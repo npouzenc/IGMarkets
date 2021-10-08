@@ -4,12 +4,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using System;
+using System.Threading.Tasks;
 
 namespace IGMarkets.Debug
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var configuration = BuildConfiguration();
             var identifier = configuration["IGMarkets:Identifier"];
@@ -19,7 +20,7 @@ namespace IGMarkets.Debug
             var container = BuildContainer();
             var ig = container.Resolve<IG>();
 
-            ig.Login(identifier, password, apiKey, demo: true);
+            await ig.Login(identifier, password, apiKey, demo: true);
         }
 
         private static IConfigurationRoot BuildConfiguration()

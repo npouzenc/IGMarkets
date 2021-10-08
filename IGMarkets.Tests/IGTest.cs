@@ -3,6 +3,7 @@ using IGMarkets.Core;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using NUnit.Framework;
+using System.Threading.Tasks;
 
 namespace IGMarkets.Tests
 {
@@ -30,13 +31,13 @@ namespace IGMarkets.Tests
         }
 
         [Test]
-        public void IsConnected_is_true_once_connected()
+        public async Task IsConnected_is_true_once_connected()
         {
             // Arrange
             var ig = container.Resolve<IG>();
 
             // Act
-            ig.Login("identifier", "password", "aaaaabbbbbcccccddddeeee");
+            await ig.Login("identifier", "password", "aaaaabbbbbcccccddddeeee");
 
             // Assert
             Assert.IsTrue(ig.IsConnected);
