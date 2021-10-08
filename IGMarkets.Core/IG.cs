@@ -17,7 +17,7 @@ namespace IGMarkets.Core
         public IG(ILogger<IG> logger)
         {
             this.logger = logger;
-            //session = new Session();
+            session = new Session();
         }
 
         public void Login(string identifier, string password, string apiKey, bool demo = false)

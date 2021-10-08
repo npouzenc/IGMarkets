@@ -8,25 +8,22 @@ using System.Threading.Tasks;
 namespace IGMarkets.Core
 {
     /// <summary>
-    /// Creates a trading session and a streaming session for a valid IG account, obtaining session tokens for subsequent API accesses.
+    /// Session object build with IG authentication response.
+    /// Cf. https://labs.ig.com/node/557
+    /// Please note that V3 version of /session endpoint is not a so-called OAuth token.
     /// </summary>
     public class Session
     {
-        private ILogger<Session> logger;
+        public string AccountId { get; set; }
 
-        public Session(ILogger<Session> logger)
-        {
-            this.logger = logger;
-        }
+        public string ApplicationKey { get; set; }
 
-        /// <summary>
-        /// Login to IGMarkets:
-        /// - V2: uses CST TOken
-        /// - V3: uses OAuthToken
-        /// </summary>
-        public void Login()
-        {
-            logger.LogInformation("Trying to connect to IG Markets.");
-        }
-    }
+        public string ClientId { get; set; }
+
+        public string ClientSessionToken { get; set; }
+
+        public string SecurityToken { get; set; }
+
+        public Uri StreamingUrl { get; set; }
+    }       
 }
