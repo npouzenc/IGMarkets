@@ -1,6 +1,6 @@
 ﻿namespace IGMarkets.Core
 {
-    public interface IService
+    public interface ITradingAPI
     {
         int Generate();
     }

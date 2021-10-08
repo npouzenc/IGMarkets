@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using IGMarkets.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using System;
@@ -10,9 +11,30 @@ namespace IGMarkets.Debug
     {
         static void Main(string[] args)
         {
-            // Autofac container.
+            var configuration = BuildConfiguration();
+            var identifier = configuration["IGMarkets:Identifier"];
+            var password = configuration["IGMarkets:Password"];
+            var apiKey = configuration["IGMarkets:APIKey"];
+
+            var container = BuildContainer();
+            var ig = container.Resolve<IG>();
+
+            ig.Login(identifier, password, apiKey, demo: true);
+        }
+
+        private static IConfigurationRoot BuildConfiguration()
+        {
+            return new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddUserSecrets<Program>()
+                .Build();
+        }
+
+        private static IContainer BuildContainer()
+        {
+            // Autofac container, registering root object IGMarkets.IG.
             var builder = new ContainerBuilder();
-            builder.RegisterType<FibonacciService>().As<IService>();
+            builder.RegisterType<IG>().AsSelf();
 
             // Create Logger<T> when ILogger<T> is required.
             builder.RegisterGeneric(typeof(Logger<>))
@@ -24,13 +46,7 @@ namespace IGMarkets.Debug
 
             // Finish registrations and prepare the container that can resolve things.
             var container = builder.Build();
-
-            // Entry point. This provides our logger instance to a Service's constructor.
-            var service = container.Resolve<IService>();
-
-            // Run.
-            int result = service.Generate();
-            Console.WriteLine(result);
+            return container;
         }
     }
 }
