@@ -72,11 +72,11 @@ namespace IGMarkets.Core
             }
         }
 
-        public void Dispose()
+        public async void Dispose()
         {
             if (IsConnected)
             {
-                Logout().Wait();
+                await Logout();
             }
         }
 
