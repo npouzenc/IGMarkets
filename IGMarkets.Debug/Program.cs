@@ -18,9 +18,18 @@ namespace IGMarkets.Debug
             var apiKey = configuration["IGMarkets:APIKey"];
 
             var container = BuildContainer();
-            var ig = container.Resolve<IG>();
-
-            await ig.Login(identifier, password, apiKey, demo: true);
+            try
+            {
+                using (var ig = container.Resolve<IG>())
+                {
+                    await ig.Login(identifier, password, apiKey, demo: true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Critical error when sending request to IG Markets REST Trading API:");
+                Console.Error.WriteLine(ex);
+            }
         }
 
         private static IConfigurationRoot BuildConfiguration()
