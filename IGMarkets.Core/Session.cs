@@ -14,7 +14,7 @@ namespace IGMarkets.Core
     /// </summary>
     public class Session
     {
-        public string AccountId { get; set; }
+        public string AccountType { get; set; }
 
         public string ApplicationKey { get; set; }
 

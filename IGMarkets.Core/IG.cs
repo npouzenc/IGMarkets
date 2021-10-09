@@ -33,14 +33,22 @@ namespace IGMarkets.Core
                 api = "https://demo-api.ig.com";
             }
 
-            Session session = await api.AppendPathSegment("/gateway/deal/session")
+            try
+            {
+                Session session = await api.AppendPathSegment("/gateway/deal/session")
                 .WithHeader("VERSION", "2")
                 .WithHeader("X-IG-API-KEY", apiKey)
                 .ConfigureRequest(settings => settings.AfterCallAsync = LogResponse)
                 .PostJsonAsync(new { identifier = identifier, password = password })
                 .ReceiveJson<Session>();
 
-            IsConnected = true;
+                IsConnected = true;
+            }
+            catch (FlurlHttpException ex)
+            {
+                var error = await ex.GetResponseJsonAsync();
+                logger.LogError(ex, $"Error returned from {ex.Call.Request.Url}: {error.SomeDetails}");
+            }
         }
 
         public void Dispose()
