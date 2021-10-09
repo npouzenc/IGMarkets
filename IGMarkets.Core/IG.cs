@@ -12,13 +12,13 @@ namespace IGMarkets.Core
 {
     public class IG : IDisposable
     {
-        private Session session;
-        private ILogger<IG> logger;
         private Credentials credentials;
-
+        private ILogger<IG> logger;
+        private Session session;
+        
         public bool IsConnected { get; private set; }
 
-        private string api = "https://api.ig.com";
+        private string api = "https://api.ig.com/gateway/deal";
 
         public IG(ILogger<IG> logger)
         {
@@ -28,17 +28,16 @@ namespace IGMarkets.Core
 
         public async Task Login(string identifier, string password, string apiKey, bool demo = false)
         {
-            logger.LogInformation("Trying to connect to IG Markets.");
+            logger.LogInformation($"Creating a dealing session with IG Markets for identifier {identifier}");
             this.credentials = new Credentials(identifier, password, apiKey);
             if (demo)
             {
-                logger.LogInformation("Using DEMO account and DEMO API endpoints.");
-                api = "https://demo-api.ig.com";
+                api = api.Replace("api", "demo-api");
             }
 
             try
             {
-                this.session = await api.AppendPathSegment("/gateway/deal/session")
+                this.session = await api.AppendPathSegment("/session")
                     .WithHeaders(new { VERSION = 3, X_IG_API_KEY = apiKey })
                     .ConfigureRequest(settings => settings.AfterCallAsync = LogResponse)
                     .PostJsonAsync(new { identifier = identifier, password = password })
@@ -54,9 +53,10 @@ namespace IGMarkets.Core
 
         public async Task Logout()
         {
+            logger.LogInformation($"Closing the dealing session {session.AccountId} for identifier {credentials.Identifier}");
             try
             {
-                await api.AppendPathSegment("/gateway/deal/session")
+                await (api + "/session")
                     .WithHeader("VERSION", "1")
                     .WithHeader("X-IG-API-KEY", credentials.APIKey)
                     .WithHeader("IG-ACCOUNT-ID", session.AccountId)

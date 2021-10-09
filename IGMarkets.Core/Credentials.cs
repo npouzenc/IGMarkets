@@ -8,6 +8,9 @@ using IGMarkets.Core.Resources;
 
 namespace IGMarkets.Core
 {
+    /// <summary>
+    /// Credentials provided by the user/app.
+    /// </summary>
     internal class Credentials
     {
         public string Identifier { get; }
@@ -15,8 +18,6 @@ namespace IGMarkets.Core
         public string Password { get; }
 
         public string APIKey { get; }
-
-        public OAuthToken OAuthToken { get; set; }
 
         public Credentials(string identifier, string password, string apiKey)
         {
@@ -28,15 +29,6 @@ namespace IGMarkets.Core
 
             Guard.Against.NullOrWhiteSpace(apiKey, nameof(apiKey));
             APIKey = apiKey;
-        }
-
-        public override string ToString()
-        {
-            if (OAuthToken is null)
-            {
-                return $"Credentials for identifier {Identifier} with no defined OAuth token";
-            }
-            return $"Credentials for identifier {Identifier} - token expires in {OAuthToken.ExpiresIn} seconds.";
         }
     }
 }
