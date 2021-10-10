@@ -22,7 +22,7 @@ namespace IGMarkets.Debug
             {
                 using (var ig = container.Resolve<IG>())
                 {
-                    await ig.Login(identifier, password, apiKey, demo: true);
+                    await ig.Login(identifier, password, apiKey, isDemo: true);
                 }
             }
             catch (Exception ex)

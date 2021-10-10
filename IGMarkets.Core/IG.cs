@@ -15,31 +15,29 @@ namespace IGMarkets.Core
         private Credentials credentials;
         private ILogger<IG> logger;
         private Session session;
-        
-        public bool IsConnected { get; private set; }
 
-        private string api = "https://api.ig.com/gateway/deal";
+        public bool IsConnected { get; private set; }
 
         public IG(ILogger<IG> logger)
         {
             this.logger = logger;
             session = new Session();
+            FlurlHttp.Configure(settings =>
+            {
+                settings.BeforeCall = LogRequest;
+                settings.AfterCallAsync = LogResponse;
+            });
         }
 
-        public async Task Login(string identifier, string password, string apiKey, bool demo = false)
+        public async Task Login(string identifier, string password, string apiKey, bool isDemo = false)
         {
-            logger.LogInformation($"Creating a dealing session with IG Markets for identifier {identifier}");
-            this.credentials = new Credentials(identifier, password, apiKey);
-            if (demo)
-            {
-                api = api.Replace("api", "demo-api");
-            }
-
+            logger.LogInformation($"Creating a dealing session with IG Markets for identifier '{identifier}'");
+            this.credentials = new Credentials(identifier, password, apiKey, isDemo);
+            
             try
             {
-                this.session = await api.AppendPathSegment("/session")
-                    .WithHeaders(new { VERSION = 3, X_IG_API_KEY = apiKey })
-                    .ConfigureRequest(settings => settings.AfterCallAsync = LogResponse)
+                var request = new IGRequest(credentials, session);
+                this.session = await request.Create("/session", 3)
                     .PostJsonAsync(new { identifier = identifier, password = password })
                     .ReceiveJson<Session>();
 
@@ -53,15 +51,11 @@ namespace IGMarkets.Core
 
         public async Task Logout()
         {
-            logger.LogInformation($"Closing the dealing session {session.AccountId} for identifier {credentials.Identifier}");
+            logger.LogInformation($"Closing the dealing session on account '{session.AccountId}' for identifier '{credentials.Identifier}'");
             try
             {
-                await (api + "/session")
-                    .WithHeader("VERSION", "1")
-                    .WithHeader("X-IG-API-KEY", credentials.APIKey)
-                    .WithHeader("IG-ACCOUNT-ID", session.AccountId)
-                    .WithOAuthBearerToken(session.OAuthToken.AccessToken)
-                    .ConfigureRequest(settings => settings.AfterCallAsync = LogResponse)
+                var request = new IGRequest(credentials, session);
+                await request.Create("/session")
                     .DeleteAsync();
 
                 IsConnected = false;
@@ -80,10 +74,21 @@ namespace IGMarkets.Core
             }
         }
 
+        private void LogRequest(FlurlCall call)
+        {
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug($"--> {call.Request.Verb} {call.Request.Url}: {call.RequestBody}");
+            }
+        }
+
         private async Task LogResponse(FlurlCall call)
         {
-            var response = await call.Response.ResponseMessage.Content.ReadAsStringAsync();
-            logger.LogDebug(call.ToString() + ": " + response);
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                var response = await call.Response.ResponseMessage.Content.ReadAsStringAsync();
+                logger.LogDebug($"<-- {call}: {response}");
+            }
         }
     }
 }
