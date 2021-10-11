@@ -1,47 +1,27 @@
-using Autofac;
-using IGMarkets.Core;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using NUnit.Framework;
 using System.Threading.Tasks;
+using IGMarkets;
 
 namespace IGMarkets.Tests
 {
     public class IGTest
     {
-        private IContainer container;
-
         [SetUp]
         public void Setup()
         {
-            // Autofac container, registering root object IGMarkets.IG.
-            var builder = new ContainerBuilder();
-            builder.RegisterType<IG>().AsSelf();
-
-            // Create Logger<T> when ILogger<T> is required.
-            builder.RegisterGeneric(typeof(Logger<>))
-                .As(typeof(ILogger<>));
-
-            // Use NLogLoggerFactory as a factory required by Logger<T>.
-            builder.RegisterType<NLogLoggerFactory>()
-                .AsImplementedInterfaces().InstancePerLifetimeScope();
-
-            // Finish registrations and prepare the container that can resolve things.
-            container = builder.Build();
         }
 
         [Test]
-        public async Task IsConnected_is_true_once_connected()
+        public void IsConnected_is_true_once_connected()
         {
             // Arrange
-            var ig = container.Resolve<IG>();
-
             // Act
-            await ig.Login("identifier", "password", "aaaaabbbbbcccccddddeeee");
+            //var ig = IG.Connect("identifier", "password", "aaaaabbbbbcccccddddeeee", isDemo: true);
 
             // Assert
-            Assert.IsTrue(ig.IsConnected);
-
+            Assert.IsTrue(false);
         }
     }
 }

@@ -1,17 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
-using IGMarkets.Core.Resources;
-using Microsoft.Extensions.Configuration;
-using NLog.Extensions.Logging;
+using IGMarkets.Resources;
 using NLog;
 
-namespace IGMarkets.Core
+namespace IGMarkets
 {
     public class IG : IDisposable
     {
@@ -31,10 +28,10 @@ namespace IGMarkets.Core
             });
         }
 
-        public async static Task<IG> Connect(string identifier, string password, string apiKey, bool isDemo = false)
+        public static IG Connect(string identifier, string password, string apiKey, bool isDemo = false)
         {
             var tradingSession = new IG();
-            await tradingSession.Login(identifier, password, apiKey, isDemo);
+            tradingSession.Login(identifier, password, apiKey, isDemo).Wait();
             return tradingSession;
         }
 

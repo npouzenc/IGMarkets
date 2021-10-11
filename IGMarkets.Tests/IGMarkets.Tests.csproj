@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IGMarkets.Core\IGMarkets.Core.csproj" />
+    <ProjectReference Include="..\IGMarkets\IGMarkets.csproj" />
   </ItemGroup>
 
 </Project>

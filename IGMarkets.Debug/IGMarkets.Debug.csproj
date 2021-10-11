@@ -7,17 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="6.2.0" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="NLog" Version="4.7.11" />
     <PackageReference Include="NLog.Config" Version="4.7.11" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.7.4" />
     <PackageReference Include="NLog.Schema" Version="4.7.11" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IGMarkets.Core\IGMarkets.Core.csproj" />
+    <ProjectReference Include="..\IGMarkets\IGMarkets.csproj" />
   </ItemGroup>
 
   <ItemGroup>
