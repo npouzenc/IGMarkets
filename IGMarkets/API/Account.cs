@@ -1,4 +1,4 @@
-﻿namespace IGMarkets.Resources
+﻿namespace IGMarkets.API
 {
     public class Account
     {

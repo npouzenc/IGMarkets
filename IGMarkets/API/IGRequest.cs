@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IGMarkets.Resources
+namespace IGMarkets.API
 {
     /// <summary>
     /// Base class for requesting IGMarkets' REST Trading API. Should be used only when a session has been already created (login passed).

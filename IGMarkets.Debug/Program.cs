@@ -19,9 +19,9 @@ namespace IGMarkets.Debug
             
             try
             {
-                using (var ig = IG.Connect(identifier, password, apiKey, isDemo: true))
+                using (var trading = IG.Connect(identifier, password, apiKey, isDemo: true))
                 {
-                    await ig.Logout();
+                    
                 }
             }
             catch (Exception ex)

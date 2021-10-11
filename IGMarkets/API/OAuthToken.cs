@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IGMarkets.Resources
+namespace IGMarkets.API
 {
     /// <summary>
     /// Pseudo-access token for consuming subsequent IG Trading API REST endpoints.

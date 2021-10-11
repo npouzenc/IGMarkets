@@ -68,7 +68,7 @@ namespace IGMarkets.Tests
             var tradingSession = ArrangeLoginSession(demo: true);
 
             // Act
-            tradingSession.Logout().Wait();
+            tradingSession.Dispose();
 
             // Assert
             Assert.IsFalse(tradingSession.IsConnected);
@@ -86,7 +86,7 @@ namespace IGMarkets.Tests
 
         #region Helper methods
 
-        private IG ArrangeLoginSession(bool demo)
+        private ITrading ArrangeLoginSession(bool demo)
         {
             var loginJsonResponse = new
             {
