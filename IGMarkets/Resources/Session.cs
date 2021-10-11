@@ -16,7 +16,7 @@ namespace IGMarkets.Resources
 
         public string ClientId { get; set; }
 
-        public string TimezoneOffset { get; set; }
+        public int TimezoneOffset { get; set; }
 
         public OAuthToken OAuthToken { get; set; }
 

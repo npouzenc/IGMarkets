@@ -14,13 +14,14 @@ namespace IGMarkets
     {
         private Credentials credentials;
         private Logger logger = LogManager.GetCurrentClassLogger();
-        private Session session;
+        public Session Session { get; private set; }
+
 
         public bool IsConnected { get; private set; }
 
         public IG()
         {
-            session = new Session();
+            Session = new Session();
             FlurlHttp.Configure(settings =>
             {
                 settings.BeforeCall = LogRequest;
@@ -42,8 +43,8 @@ namespace IGMarkets
             
             try
             {
-                var request = new IGRequest(credentials, session);
-                this.session = await request.Create("/session", 3)
+                var request = new IGRequest(credentials, Session);
+                this.Session = await request.Create("/session", 3)
                     .PostJsonAsync(new { identifier = identifier, password = password })
                     .ReceiveJson<Session>();
 
@@ -57,10 +58,10 @@ namespace IGMarkets
 
         public async Task Logout()
         {
-            logger.Info($"Closing the dealing session on account '{session.AccountId}' for identifier '{credentials.Identifier}'");
+            logger.Info($"Closing the dealing session on account '{Session.AccountId}' for identifier '{credentials.Identifier}'");
             try
             {
-                var request = new IGRequest(credentials, session);
+                var request = new IGRequest(credentials, Session);
                 await request.Create("/session")
                     .DeleteAsync();
 
