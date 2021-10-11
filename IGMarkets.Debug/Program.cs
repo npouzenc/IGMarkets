@@ -21,7 +21,7 @@ namespace IGMarkets.Debug
             {
                 using (var trading = IG.Connect(identifier, password, apiKey, isDemo: true))
                 {
-                    
+                    await trading.RefreshSession();
                 }
             }
             catch (Exception ex)

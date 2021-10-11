@@ -13,5 +13,7 @@ namespace IGMarkets
         public bool IsConnected { get; }
 
         Session Session{ get; }
+
+        Task RefreshSession();
     }
 }

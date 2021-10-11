@@ -75,6 +75,25 @@ namespace IGMarkets
                 logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
             }
         }
+
+        public async Task RefreshSession()
+        {
+            logger.Info($"Refreshing the dealing session on account '{Session.AccountId}' for identifier '{credentials.Identifier}'");
+            try
+            {
+                var request = new IGRequest(credentials, Session);
+
+                Session = await request.Create("/session/refresh-token")
+                    .PostJsonAsync(new { refresh_token = Session.OAuthToken.RefreshToken })
+                    .ReceiveJson<Session>();
+
+                IsConnected = true;
+            }
+            catch (FlurlHttpException ex)
+            {
+                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+            }
+        }
         #endregion
 
 

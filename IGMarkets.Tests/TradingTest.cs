@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 using IGMarkets;
 using Flurl.Http.Testing;
 using System.Net.Http;
+using System;
 
 namespace IGMarkets.Tests
 {
     [TestFixture]
-    public class IGTest
+    public class TradingTest
     {
         private HttpTest httpTest;
 
@@ -20,19 +21,19 @@ namespace IGMarkets.Tests
         }
 
         [Test]
-        public void IG_Login()
+        public void Trading_Login()
         {
             // Arrange
             var loginJsonResponse = new
             {
-                clientId = 100557439,
-                accountId = "ABCDE",
+                clientId = 16180339,
+                accountId = "XXXXX",
                 timezoneOffset = 1,
                 lightstreamerEndpoint = "https://demo-apd.marketdatasystems.com",
                 oauthToken = new
                 {
-                    access_token = "11111111-2222-3333-4444-555555555555",
-                    refresh_token = "011111111-2222-3333-4444-555555555555",
+                    access_token = Guid.NewGuid().ToString(),
+                    refresh_token = Guid.NewGuid().ToString(),
                     scope = "profile",
                     token_type = "Bearer",
                     expires_in = 60
@@ -41,7 +42,7 @@ namespace IGMarkets.Tests
             httpTest.RespondWithJson(loginJsonResponse);
 
             // Act
-            var tradingSession = IG.Connect("identifier", "password", "aaaaabbbbbcccccddddeeee", isDemo: true);
+            var tradingSession = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
 
             // Assert
             Assert.IsTrue(tradingSession.IsConnected);
@@ -62,20 +63,43 @@ namespace IGMarkets.Tests
         }
 
         [Test]
-        public void IG_Logout()
+        public void Trading_Logout()
         {
             // Arrange
-            var tradingSession = ArrangeLoginSession(demo: true);
+            ArrangeHttpSessionResponse(demo: true);
+            var trading = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
 
             // Act
-            tradingSession.Dispose();
+            trading.Dispose();
 
             // Assert
-            Assert.IsFalse(tradingSession.IsConnected);
+            Assert.IsFalse(trading.IsConnected);
             httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session")
                 .WithVerb(HttpMethod.Delete)
                 .WithHeader("VERSION")
                 .WithHeader("X-IG-API-KEY");
+        }
+
+        [Test]
+        public void Trading_Refresh()
+        {
+            // Arrange
+            ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session
+            var trading = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
+            string refreshToken = trading.Session.OAuthToken.RefreshToken;
+            ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session/refresh-token
+
+            // Act
+            trading.RefreshSession();
+
+            // Assert
+            Assert.IsTrue(trading.IsConnected);
+            Assert.AreNotEqual(refreshToken, trading.Session.OAuthToken.RefreshToken);
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session/refresh-token")
+                .WithVerb(HttpMethod.Post)
+                .WithHeader("VERSION")
+                .WithHeader("X-IG-API-KEY")
+                .WithRequestBody("*refresh_token*");
         }
 
         [TearDown]
@@ -86,25 +110,24 @@ namespace IGMarkets.Tests
 
         #region Helper methods
 
-        private ITrading ArrangeLoginSession(bool demo)
+        private void ArrangeHttpSessionResponse(bool demo)
         {
             var loginJsonResponse = new
             {
-                clientId = 100557439,
-                accountId = "ABCDE",
+                clientId = 3,
+                accountId = "XXXXX",
                 timezoneOffset = 1,
                 lightstreamerEndpoint = demo ? "https://demo-apd.marketdatasystems.com": "https://apd.marketdatasystems.com",
                 oauthToken = new
                 {
-                    access_token = "11111111-2222-3333-4444-555555555555",
-                    refresh_token = "011111111-2222-3333-4444-555555555555",
+                    access_token = Guid.NewGuid(),
+                    refresh_token = Guid.NewGuid(),
                     scope = "profile",
                     token_type = "Bearer",
                     expires_in = 60
                 }
             };
             httpTest.RespondWithJson(loginJsonResponse);
-            return IG.Connect("identifier", "password", "aaaaabbbbbcccccddddeeee", demo);
         }
 
         #endregion
