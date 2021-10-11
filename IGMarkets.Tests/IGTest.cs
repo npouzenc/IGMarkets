@@ -65,23 +65,7 @@ namespace IGMarkets.Tests
         public void IG_Logout()
         {
             // Arrange
-            var loginJsonResponse = new
-            {
-                clientId = 100557439,
-                accountId = "ABCDE",
-                timezoneOffset = 1,
-                lightstreamerEndpoint = "https://demo-apd.marketdatasystems.com",
-                oauthToken = new
-                {
-                    access_token = "11111111-2222-3333-4444-555555555555",
-                    refresh_token = "011111111-2222-3333-4444-555555555555",
-                    scope = "profile",
-                    token_type = "Bearer",
-                    expires_in = 60
-                }
-            };
-            httpTest.RespondWithJson(loginJsonResponse);
-            var tradingSession = IG.Connect("identifier", "password", "aaaaabbbbbcccccddddeeee", isDemo: true);
+            var tradingSession = ArrangeLoginSession(demo: true);
 
             // Act
             tradingSession.Logout().Wait();
@@ -99,5 +83,30 @@ namespace IGMarkets.Tests
         {
             httpTest.Dispose();
         }
+
+        #region Helper methods
+
+        private IG ArrangeLoginSession(bool demo)
+        {
+            var loginJsonResponse = new
+            {
+                clientId = 100557439,
+                accountId = "ABCDE",
+                timezoneOffset = 1,
+                lightstreamerEndpoint = demo ? "https://demo-apd.marketdatasystems.com": "https://apd.marketdatasystems.com",
+                oauthToken = new
+                {
+                    access_token = "11111111-2222-3333-4444-555555555555",
+                    refresh_token = "011111111-2222-3333-4444-555555555555",
+                    scope = "profile",
+                    token_type = "Bearer",
+                    expires_in = 60
+                }
+            };
+            httpTest.RespondWithJson(loginJsonResponse);
+            return IG.Connect("identifier", "password", "aaaaabbbbbcccccddddeeee", demo);
+        }
+
+        #endregion
     }
 }
