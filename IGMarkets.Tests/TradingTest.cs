@@ -20,6 +20,13 @@ namespace IGMarkets.Tests
             httpTest = new HttpTest();
         }
 
+        [TearDown]
+        public void DisposeHttpTest()
+        {
+            httpTest.Dispose();
+        }
+
+        #region Tests for /session
         [Test]
         public void Trading_Login()
         {
@@ -101,12 +108,22 @@ namespace IGMarkets.Tests
                 .WithHeader("X-IG-API-KEY")
                 .WithRequestBody("*refresh_token*");
         }
+        #endregion
 
-        [TearDown]
-        public void DisposeHttpTest()
+        #region Tests for /markets
+
+        public void Trading_MarketNavigation()
         {
-            httpTest.Dispose();
+            // Arrange
+            ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session
+            var trading = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
+
+            // Act
+           var markets = trading.SearchMarkets("CAC40");
+
+            // Assert
         }
+        #endregion
 
         #region Helper methods
 

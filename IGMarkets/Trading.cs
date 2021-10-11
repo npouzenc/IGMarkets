@@ -96,7 +96,28 @@ namespace IGMarkets
         }
         #endregion
 
+        #region /markets REST API endpoints
 
+        public async Task<IList<SearchMarketResult>> SearchMarkets(string searchTerm)
+        {
+            logger.Info($"Searching markets with the term '{searchTerm}'");
+            try
+            {
+                var request = new IGRequest(credentials, Session);
+
+                var searchResults = await request.Create("/markets?searchTerm=")
+                    .SetQueryParam("searchTerm", searchTerm, true)
+                    .GetJsonAsync<SearchMarketsResult>();
+                return searchResults.Markets;   
+            }
+            catch (FlurlHttpException ex)
+            {
+                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
+            }
+
+        }
+        #endregion
 
         public async void Dispose()
         {

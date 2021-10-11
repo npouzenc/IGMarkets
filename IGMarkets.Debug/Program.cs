@@ -12,16 +12,17 @@ namespace IGMarkets.Debug
         static async Task Main(string[] args)
         {
             var configuration = BuildConfiguration();
-            var identifier = configuration["IGMarkets:Identifier"];
-            var password = configuration["IGMarkets:Password"];
-            var apiKey = configuration["IGMarkets:APIKey"];
-
-            
+            var identifier = configuration["IG:login"];
+            var password = configuration["IG:password"];
+            var apiKey = configuration["IG:key"];
+                        
             try
             {
                 using (var trading = IG.Connect(identifier, password, apiKey, isDemo: true))
                 {
-                    await trading.RefreshSession();
+                    var results = await trading.SearchMarkets("CAC40");
+                    Console.WriteLine("Search results:");
+                    Console.WriteLine(results.Count);
                 }
             }
             catch (Exception ex)

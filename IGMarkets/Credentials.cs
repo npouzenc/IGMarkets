@@ -11,7 +11,7 @@ namespace IGMarkets
     /// <summary>
     /// Credentials provided by the user/app.
     /// </summary>
-    internal class Credentials
+    public class Credentials
     {
         public string Identifier { get; }
 
