@@ -12,11 +12,24 @@ namespace IGMarkets
 {
     public class Trading : ITrading
     {
+        /// <summary>
+        /// Credentials for IGMarkets.
+        /// </summary>
         private Credentials credentials;
+
+        /// <summary>
+        /// NLog
+        /// </summary>
         private Logger logger = LogManager.GetCurrentClassLogger();
+
+        /// <summary>
+        /// Current session once connected.
+        /// </summary>
         public Session Session { get; private set; }
 
-
+        /// <summary>
+        /// Is the current session connected to IGMarkets ?
+        /// </summary>
         public bool IsConnected { get; private set; }
 
         public Trading()
@@ -117,7 +130,37 @@ namespace IGMarkets
             }
 
         }
+
+        /// <summary>
+        /// Returns the details of the given markets.
+        /// </summary>
+        /// <param name="markets">List of markets to retrieve.</param>
+        /// <returns>Markets details</returns>
+        public async Task<IList<MarketDetails>> GetMarkets(params string[] markets)
+        {
+            string epics = string.Join(',', markets);
+            logger.Info($"Looking for details for the following markets: {epics}");
+            try
+            {
+                var request = new IGRequest(credentials, Session);
+
+                var marketsDetails = await request.Create("/markets")
+                    .SetQueryParam("epics", epics, true)
+                    .GetJsonAsync<MarketsDetails>();
+
+                return marketsDetails.MarketDetails;
+                
+            }
+            catch (FlurlHttpException ex)
+            {
+                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
+            }
+
+        }
         #endregion
+
+        #region IDisposable
 
         public async void Dispose()
         {
@@ -126,6 +169,9 @@ namespace IGMarkets
                 await Logout();
             }
         }
+        #endregion
+
+        #region Private methods
 
         private void LogRequest(FlurlCall call)
         {
@@ -143,5 +189,7 @@ namespace IGMarkets
                 logger.Debug($"<-- {call}: {response}");
             }
         }
+
+        #endregion
     }
 }

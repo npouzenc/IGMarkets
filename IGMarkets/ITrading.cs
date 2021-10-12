@@ -17,5 +17,7 @@ namespace IGMarkets
         Task RefreshSession();
 
         Task<IList<SearchMarketResult>> SearchMarkets(string searchTerm);
+
+        Task<IList<MarketDetails>> GetMarkets(params string[] markets);
     }
 }
