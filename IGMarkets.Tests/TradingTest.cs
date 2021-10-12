@@ -108,6 +108,7 @@ namespace IGMarkets.Tests
                 .WithVerb(HttpMethod.Post)
                 .WithHeader("VERSION")
                 .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken()
                 .WithRequestBody("*refresh_token*");
         }
 
@@ -116,7 +117,8 @@ namespace IGMarkets.Tests
         #region Tests for /markets
 
         [Test]
-        public async Task Trading_GetMarkets()
+        // https://labs.ig.com/rest-trading-api-reference/service-detail?id=590
+        public async Task Trading_GetMarkets_AllDetails()
         {
             // Arrange
             ITrading trading = Connect();
@@ -124,9 +126,15 @@ namespace IGMarkets.Tests
             httpTest.RespondWith(jsonResponse);
 
             // Act
-            var marketsDetails = await trading.GetMarkets("CS.D.EURUSD.CFD.IP", "CS.D.EURUSD.MINI.IP");
+            var marketsDetails = await trading.GetMarkets(snapshotOnly: false, 
+                "CS.D.EURUSD.CFD.IP", "CS.D.EURUSD.MINI.IP");
 
             // Assert
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets?epics=CS.D.EURUSD.CFD.IP,CS.D.EURUSD.MINI.IP")
+                .WithVerb(HttpMethod.Get)
+                .WithHeader("VERSION")
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
             Assert.AreEqual(2, marketsDetails.Count);
             var cfdEURUSD = marketsDetails[0];
             var miniEURUSD = marketsDetails[1];
@@ -152,6 +160,39 @@ namespace IGMarkets.Tests
             Assert.AreEqual(1.15593, miniEURUSD.Snapshot.Offer);
             Assert.AreEqual("10:06:44", miniEURUSD.Snapshot.UpdateTime);
             Assert.AreEqual(5.0, miniEURUSD.DealingRules.MinStepDistance.Value);
+        }
+
+        [Test]
+        public async Task Trading_GetMarkets_SnapshotOnly()
+        {
+            // Arrange
+            ITrading trading = Connect();
+            var jsonResponse = LoadResource("markets_CS.D.EURUSD.CFD.IP (snapshot only).json");
+            httpTest.RespondWith(jsonResponse);
+
+            // Act
+            var marketsDetails = await trading.GetMarkets(snapshotOnly: true, "CS.D.EURUSD.CFD.IP");
+
+            // Assert
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets?epics=CS.D.EURUSD.CFD.IP&filter=SNAPSHOT_ONLY")
+                .WithVerb(HttpMethod.Get)
+                .WithHeader("VERSION")
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.AreEqual(1, marketsDetails.Count);
+            var cfdEURUSD = marketsDetails[0];
+            Assert.IsNull(cfdEURUSD.DealingRules);
+            Assert.IsNotNull(cfdEURUSD.Instrument);
+            Assert.IsNotNull(cfdEURUSD.Snapshot);
+            Assert.AreEqual("CS.D.EURUSD.CFD.IP", cfdEURUSD.Instrument.Epic);
+            Assert.AreEqual("CURRENCIES", cfdEURUSD.Instrument.Type);
+            Assert.AreEqual(1.15424, cfdEURUSD.Snapshot.Bid);
+            Assert.AreEqual(1.15433, cfdEURUSD.Snapshot.Offer);
+            Assert.AreEqual(1.15708, cfdEURUSD.Snapshot.High);
+            Assert.AreEqual(1.15329, cfdEURUSD.Snapshot.Low); 
+            Assert.AreEqual("14:01:11", cfdEURUSD.Snapshot.UpdateTime);
+            Assert.AreEqual(-0.08, cfdEURUSD.Snapshot.PercentageChange);
+            Assert.AreEqual(-0.00096, cfdEURUSD.Snapshot.NetChange);
         }
         #endregion
 

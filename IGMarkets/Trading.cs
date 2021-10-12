@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Ardalis.GuardClauses;
 using Flurl;
 using Flurl.Http;
 using IGMarkets.API;
@@ -138,19 +139,25 @@ namespace IGMarkets
         /// <summary>
         /// Returns the details of the given markets.
         /// </summary>
-        /// <param name="markets">List of markets to retrieve.</param>
+        /// <param name="epics">List of markets to retrieve.</param>
+        /// <param name="snapshotOnly">If false (default value) then display the market snapshot and minimal instrument data fields. Else display all market details. </param>
         /// <returns>Markets details</returns>
-        public async Task<IList<MarketDetails>> GetMarkets(params string[] markets)
+        public async Task<IList<MarketDetails>> GetMarkets(bool snapshotOnly = false, params string[] epics)
         {
-            string epics = string.Join(',', markets);
+            Guard.Against.Null(epics, "epics", nameof(epics));
+            Guard.Against.OutOfRange(epics.Length, "epics", 1, 50);
+
+            string epicsQueryParam = string.Join(',', epics);
+
             logger.Info($"Looking for details for the following markets: {epics}");
             try
             {
                 var request = new IGRequest(credentials, Session);
 
                 var response = await request
-                    .Endpoint("/markets")
-                    .SetQueryParam("epics", epics, true)
+                    .Endpoint("/markets", version: 2)
+                    .SetQueryParam("epics", epicsQueryParam, true)
+                    .SetQueryParam("filter", snapshotOnly ? "SNAPSHOT_ONLY":"ALL")
                     .GetJsonAsync<MarketsDetails>();
 
                 return response.MarketDetails;

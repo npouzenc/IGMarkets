@@ -1,0 +1,52 @@
+{
+  "marketDetails": [
+    {
+      "instrument": {
+        "epic": "CS.D.EURUSD.CFD.IP",
+        "expiry": null,
+        "name": null,
+        "forceOpenAllowed": false,
+        "stopsLimitsAllowed": false,
+        "lotSize": null,
+        "unit": null,
+        "type": "CURRENCIES",
+        "controlledRiskAllowed": false,
+        "streamingPricesAvailable": false,
+        "marketId": null,
+        "currencies": null,
+        "sprintMarketsMinimumExpiryTime": null,
+        "sprintMarketsMaximumExpiryTime": null,
+        "marginDepositBands": null,
+        "marginFactor": null,
+        "marginFactorUnit": null,
+        "slippageFactor": null,
+        "limitedRiskPremium": null,
+        "openingHours": null,
+        "expiryDetails": null,
+        "rolloverDetails": null,
+        "newsCode": null,
+        "chartCode": null,
+        "country": null,
+        "valueOfOnePip": null,
+        "onePipMeans": null,
+        "contractSize": null,
+        "specialInfo": null
+      },
+      "dealingRules": null,
+      "snapshot": {
+        "marketStatus": "TRADEABLE",
+        "netChange": -0.00096,
+        "percentageChange": -0.08,
+        "updateTime": "14:01:11",
+        "delayTime": 0,
+        "bid": 1.15424,
+        "offer": 1.15433,
+        "high": 1.15708,
+        "low": 1.15329,
+        "binaryOdds": null,
+        "decimalPlacesFactor": 5,
+        "scalingFactor": 10000,
+        "controlledRiskExtraSpread": 2
+      }
+    }
+  ]}

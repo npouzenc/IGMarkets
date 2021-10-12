@@ -20,7 +20,7 @@ namespace IGMarkets.Debug
             {
                 using (var trading = IG.Connect(identifier, password, apiKey, isDemo: true))
                 {
-                    var results = await trading.GetMarkets("CS.D.EURUSD.CFD.IP");
+                    var results = await trading.GetMarkets(snapshotOnly: true, "CS.D.EURUSD.CFD.IP");
                     Console.WriteLine("Search results:");
                     Console.WriteLine(results.Count);
                 }
