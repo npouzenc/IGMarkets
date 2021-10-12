@@ -20,7 +20,13 @@ namespace IGMarkets.Debug
             {
                 using (var trading = IG.Connect(identifier, password, apiKey, isDemo: true))
                 {
-                    var results = await trading.GetMarkets(snapshotOnly: true, "CS.D.EURUSD.CFD.IP");
+                    var epics = new System.Collections.Generic.List<string>();
+                    for (int i = 0; i < 51; i++)
+                    {
+                        epics.Add("CS.D.EURUSD.MINI.IP");
+                    }
+
+                    var results = await trading.GetMarkets(snapshotOnly: true, epics.ToArray());
                     Console.WriteLine("Search results:");
                     Console.WriteLine(results.Count);
                 }

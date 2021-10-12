@@ -117,6 +117,17 @@ namespace IGMarkets.Tests
         #region Tests for /markets
 
         [Test]
+        public void Trading_GetMarkets_OutOfRange()
+        {
+            // Arrange
+            ITrading trading = Connect();
+            string[] epics = new string[51];
+
+            // Act && Assert
+            Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () => await trading.GetMarkets(snapshotOnly: false, epics));
+        }
+
+        [Test]
         // https://labs.ig.com/rest-trading-api-reference/service-detail?id=590
         public async Task Trading_GetMarkets_AllDetails()
         {
