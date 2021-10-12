@@ -3,9 +3,12 @@ using NLog.Extensions.Logging;
 using NUnit.Framework;
 using System.Threading.Tasks;
 using IGMarkets;
+using Flurl.Http;
 using Flurl.Http.Testing;
 using System.Net.Http;
 using System;
+using Newtonsoft.Json;
+using Flurl.Http.Configuration;
 
 namespace IGMarkets.Tests
 {
@@ -18,6 +21,13 @@ namespace IGMarkets.Tests
         public void Setup()
         {
             httpTest = new HttpTest();
+        }
+
+        private ITrading Connect()
+        {
+            ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session
+            var trading = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
+            return trading;
         }
 
         [TearDown]
@@ -73,8 +83,7 @@ namespace IGMarkets.Tests
         public void Trading_Logout()
         {
             // Arrange
-            ArrangeHttpSessionResponse(demo: true);
-            var trading = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
+            ITrading trading = Connect();
 
             // Act
             trading.Dispose();
@@ -91,8 +100,7 @@ namespace IGMarkets.Tests
         public void Trading_Refresh()
         {
             // Arrange
-            ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session
-            var trading = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
+            ITrading trading = Connect();
             string refreshToken = trading.Session.OAuthToken.RefreshToken;
             ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session/refresh-token
 
@@ -108,20 +116,48 @@ namespace IGMarkets.Tests
                 .WithHeader("X-IG-API-KEY")
                 .WithRequestBody("*refresh_token*");
         }
+
         #endregion
 
         #region Tests for /markets
 
-        public void Trading_MarketNavigation()
+        [Test]
+        public async Task Trading_GetMarkets()
         {
             // Arrange
-            ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session
-            var trading = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
+            ITrading trading = Connect();
+            var jsonResponse = LoadResource("markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json");
+            httpTest.RespondWith(jsonResponse);
 
             // Act
-           var markets = trading.SearchMarkets("CAC40");
+            var marketsDetails = await trading.GetMarkets("CS.D.EURUSD.CFD.IP", "CS.D.EURUSD.MINI.IP");
 
             // Assert
+            Assert.AreEqual(2, marketsDetails.Count);
+            var cfdEURUSD = marketsDetails[0];
+            var miniEURUSD = marketsDetails[1];
+            Assert.IsNotNull(cfdEURUSD.DealingRules);
+            Assert.IsNotNull(cfdEURUSD.Instrument);
+            Assert.IsNotNull(cfdEURUSD.Snapshot);
+            Assert.AreEqual("CS.D.EURUSD.CFD.IP", cfdEURUSD.Instrument.Epic);
+            Assert.AreEqual("CS.D.EURUSD.MINI.IP", miniEURUSD.Instrument.Epic);
+            Assert.AreEqual("EURUSD", cfdEURUSD.Instrument.MarketId);
+            Assert.IsTrue(cfdEURUSD.Instrument.ForceOpenAllowed);
+            Assert.IsTrue(cfdEURUSD.Instrument.StopsLimitsAllowed);
+            Assert.IsTrue(cfdEURUSD.Instrument.ControlledRiskAllowed);
+            Assert.IsTrue(cfdEURUSD.Instrument.StreamingPricesAvailable);
+            Assert.IsNull(cfdEURUSD.Instrument.SprintMarketsMaximumExpiryTime);
+            Assert.IsNull(cfdEURUSD.Instrument.SprintMarketsMinimumExpiryTime);
+            Assert.AreEqual(1.1559, cfdEURUSD.Instrument.Currencies[0].BaseExchangeRate);
+            Assert.AreEqual(0.66, cfdEURUSD.Instrument.Currencies[0].ExchangeRate);
+            // Really IG? You need THAT precision for margin factor?!
+            Assert.AreEqual(3.330000000000000071054273576m, cfdEURUSD.Instrument.MarginFactor);
+            Assert.AreEqual("AVAILABLE_DEFAULT_OFF", miniEURUSD.DealingRules.MarketOrderPreference);
+            Assert.AreEqual("AVAILABLE", miniEURUSD.DealingRules.TrailingStopsPreference);
+            Assert.AreEqual(1.15587, miniEURUSD.Snapshot.Bid);
+            Assert.AreEqual(1.15593, miniEURUSD.Snapshot.Offer);
+            Assert.AreEqual("10:06:44", miniEURUSD.Snapshot.UpdateTime);
+            Assert.AreEqual(5.0, miniEURUSD.DealingRules.MinStepDistance.Value);
         }
         #endregion
 
@@ -145,6 +181,18 @@ namespace IGMarkets.Tests
                 }
             };
             httpTest.RespondWithJson(loginJsonResponse);
+        }
+
+
+        private string LoadResource(string filename)
+        {
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            using (var stream = assembly.GetManifestResourceStream("IGMarkets.Tests.Json." + filename))
+            using (var reader = new System.IO.StreamReader(stream))
+            {
+                string result = reader.ReadToEnd();
+                return result.Trim().Replace("\r\n", string.Empty).Replace("\t", string.Empty);
+            }
         }
 
         #endregion

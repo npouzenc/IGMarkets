@@ -14,6 +14,9 @@
         /// Base exchange rate
         ///</Summary>
         public decimal? BaseExchangeRate { get; set; }
+
+        public decimal? ExchangeRate { get; set; }
+
         ///<Summary>
         /// True if this is the default currency
         ///</Summary>

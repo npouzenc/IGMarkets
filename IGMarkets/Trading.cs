@@ -60,7 +60,8 @@ namespace IGMarkets
             try
             {
                 var request = new IGRequest(credentials, Session);
-                this.Session = await request.Create("/session", 3)
+                this.Session = await request
+                    .Endpoint("/session", 3)
                     .PostJsonAsync(new { identifier = identifier, password = password })
                     .ReceiveJson<Session>();
 
@@ -78,7 +79,8 @@ namespace IGMarkets
             try
             {
                 var request = new IGRequest(credentials, Session);
-                await request.Create("/session")
+                await request
+                    .Endpoint("/session")
                     .DeleteAsync();
 
                 IsConnected = false;
@@ -96,7 +98,8 @@ namespace IGMarkets
             {
                 var request = new IGRequest(credentials, Session);
 
-                Session = await request.Create("/session/refresh-token")
+                Session = await request
+                    .Endpoint("/session/refresh-token")
                     .PostJsonAsync(new { refresh_token = Session.OAuthToken.RefreshToken })
                     .ReceiveJson<Session>();
 
@@ -118,7 +121,8 @@ namespace IGMarkets
             {
                 var request = new IGRequest(credentials, Session);
 
-                var searchResults = await request.Create("/markets?searchTerm=")
+                var searchResults = await request
+                    .Endpoint("/markets?searchTerm=")
                     .SetQueryParam("searchTerm", searchTerm, true)
                     .GetJsonAsync<SearchMarketsResult>();
                 return searchResults.Markets;   
@@ -144,11 +148,12 @@ namespace IGMarkets
             {
                 var request = new IGRequest(credentials, Session);
 
-                var marketsDetails = await request.Create("/markets")
+                var response = await request
+                    .Endpoint("/markets")
                     .SetQueryParam("epics", epics, true)
                     .GetJsonAsync<MarketsDetails>();
 
-                return marketsDetails.MarketDetails;
+                return response.MarketDetails;
                 
             }
             catch (FlurlHttpException ex)

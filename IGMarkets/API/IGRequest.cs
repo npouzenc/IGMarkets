@@ -49,7 +49,7 @@ namespace IGMarkets.API
 
         }
 
-        public IFlurlRequest Create(string path, int version = 1)
+        public IFlurlRequest Endpoint(string path, int version = 1)
         {
             string endpoint = Url.Combine(Api, path);
             var request = endpoint.WithHeader("VERSION", version)

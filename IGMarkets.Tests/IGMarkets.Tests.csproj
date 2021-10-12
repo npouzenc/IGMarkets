@@ -7,6 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Json\markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json" />
+    <None Remove="Json\markets_CS.D.EURUSD.CFD.IP.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Json\markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json" />
+    <EmbeddedResource Include="Json\markets_CS.D.EURUSD.CFD.IP.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="6.3.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
