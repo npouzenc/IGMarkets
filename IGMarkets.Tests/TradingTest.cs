@@ -1,14 +1,8 @@
-using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
-using NUnit.Framework;
-using System.Threading.Tasks;
-using IGMarkets;
-using Flurl.Http;
 using Flurl.Http.Testing;
-using System.Net.Http;
+using NUnit.Framework;
 using System;
-using Newtonsoft.Json;
-using Flurl.Http.Configuration;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace IGMarkets.Tests
 {
