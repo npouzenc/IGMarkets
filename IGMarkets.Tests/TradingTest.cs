@@ -200,10 +200,41 @@ namespace IGMarkets.Tests
             Assert.AreEqual(1.15424, cfdEURUSD.Snapshot.Bid);
             Assert.AreEqual(1.15433, cfdEURUSD.Snapshot.Offer);
             Assert.AreEqual(1.15708, cfdEURUSD.Snapshot.High);
-            Assert.AreEqual(1.15329, cfdEURUSD.Snapshot.Low); 
+            Assert.AreEqual(1.15329, cfdEURUSD.Snapshot.Low);
             Assert.AreEqual("14:01:11", cfdEURUSD.Snapshot.UpdateTime);
             Assert.AreEqual(-0.08, cfdEURUSD.Snapshot.PercentageChange);
             Assert.AreEqual(-0.00096, cfdEURUSD.Snapshot.NetChange);
+        }
+
+        [Test]
+        public async Task Trading_GetMarket()
+        {
+            // Arrange
+            ITrading trading = Connect();
+            var jsonResponse = LoadResource("markets_CS.D.EURUSD.MINI.IP.json");
+            httpTest.RespondWith(jsonResponse);
+
+            // Act
+            var miniEURUSD = await trading.GetMarket("CS.D.EURUSD.MINI.IP");
+
+            // Assert
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets/CS.D.EURUSD.MINI.IP")
+                .WithVerb(HttpMethod.Get)
+                .WithHeader("VERSION")
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotNull(miniEURUSD);
+            Assert.IsNotNull(miniEURUSD.Instrument);
+            Assert.IsNotNull(miniEURUSD.Snapshot);
+            Assert.AreEqual("CS.D.EURUSD.MINI.IP", miniEURUSD.Instrument.Epic);
+            Assert.AreEqual("CURRENCIES", miniEURUSD.Instrument.Type);
+            Assert.AreEqual("10000", miniEURUSD.Instrument.ContractSize);
+            Assert.AreEqual(1.15402, miniEURUSD.Snapshot.Bid);
+            Assert.AreEqual(1.15411, miniEURUSD.Snapshot.Offer);
+            Assert.AreEqual(1.15708, miniEURUSD.Snapshot.High);
+            Assert.AreEqual(1.15329, miniEURUSD.Snapshot.Low);
+            Assert.AreEqual("16:04:17", miniEURUSD.Snapshot.UpdateTime);
+            Assert.AreEqual("TRADEABLE", miniEURUSD.Snapshot.MarketStatus);
         }
         #endregion
 

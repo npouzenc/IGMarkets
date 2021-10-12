@@ -149,7 +149,7 @@ namespace IGMarkets
 
             string epicsQueryParam = string.Join(',', epics);
 
-            logger.Info($"Looking for details for the following markets: {epics}");
+            logger.Info($"Looking for the following markets: {epics}");
             try
             {
                 var request = new IGRequest(credentials, Session);
@@ -170,6 +170,30 @@ namespace IGMarkets
             }
 
         }
+
+        public async Task<MarketDetails> GetMarket(string epic)
+        {
+            Guard.Against.NullOrEmpty(epic, nameof(epic));
+
+            logger.Info($"Looking for the following market: {epic}");
+            try
+            {
+                var request = new IGRequest(credentials, Session);
+
+                var market = await request
+                    .Endpoint("/markets/" + epic, version: 3)
+                    .GetJsonAsync<MarketDetails>();
+
+                return market;
+
+            }
+            catch (FlurlHttpException ex)
+            {
+                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
+            }
+        }
+
         #endregion
 
         #region IDisposable

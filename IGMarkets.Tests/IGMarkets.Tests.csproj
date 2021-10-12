@@ -9,13 +9,13 @@
   <ItemGroup>
     <None Remove="Json\markets_CS.D.EURUSD.CFD.IP (snapshot only).json" />
     <None Remove="Json\markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json" />
-    <None Remove="Json\markets_CS.D.EURUSD.CFD.IP.json" />
+    <None Remove="Json\markets_CS.D.EURUSD.MINI.IP.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Json\markets_CS.D.EURUSD.CFD.IP %28snapshot only%29.json" />
     <EmbeddedResource Include="Json\markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json" />
-    <EmbeddedResource Include="Json\markets_CS.D.EURUSD.CFD.IP.json" />
+    <EmbeddedResource Include="Json\markets_CS.D.EURUSD.MINI.IP.json" />
   </ItemGroup>
 
   <ItemGroup>

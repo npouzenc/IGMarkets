@@ -19,5 +19,7 @@ namespace IGMarkets
         Task<IList<SearchMarketResult>> SearchMarkets(string searchTerm);
 
         Task<IList<MarketDetails>> GetMarkets(bool snapshotOnly = false, params string[] epics);
+
+        Task<MarketDetails> GetMarket(string epic);
     }
 }
