@@ -1,0 +1,268 @@
+{
+  "prices": [
+    {
+      "snapshotTime": "2021/10/13 09:06:00",
+      "snapshotTimeUTC": "2021-10-13T07:06:00",
+      "openPrice": {
+        "bid": 1.15476,
+        "ask": 1.15485,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.15456,
+        "ask": 1.15465,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.15476,
+        "ask": 1.15485,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.15456,
+        "ask": 1.15463,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 119
+    },
+    {
+      "snapshotTime": "2021/10/13 09:07:00",
+      "snapshotTimeUTC": "2021-10-13T07:07:00",
+      "openPrice": {
+        "bid": 1.15455,
+        "ask": 1.15464,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.15465,
+        "ask": 1.15474,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.15477,
+        "ask": 1.15485,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.15451,
+        "ask": 1.15458,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 131
+    },
+    {
+      "snapshotTime": "2021/10/13 09:08:00",
+      "snapshotTimeUTC": "2021-10-13T07:08:00",
+      "openPrice": {
+        "bid": 1.15464,
+        "ask": 1.15473,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.15461,
+        "ask": 1.15470,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.15465,
+        "ask": 1.15473,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.15454,
+        "ask": 1.15461,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 91
+    },
+    {
+      "snapshotTime": "2021/10/13 09:09:00",
+      "snapshotTimeUTC": "2021-10-13T07:09:00",
+      "openPrice": {
+        "bid": 1.15463,
+        "ask": 1.15469,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.15470,
+        "ask": 1.15476,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.15473,
+        "ask": 1.15480,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.15459,
+        "ask": 1.15467,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 105
+    },
+    {
+      "snapshotTime": "2021/10/13 09:10:00",
+      "snapshotTimeUTC": "2021-10-13T07:10:00",
+      "openPrice": {
+        "bid": 1.15468,
+        "ask": 1.15477,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.15461,
+        "ask": 1.15470,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.15469,
+        "ask": 1.15478,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.15458,
+        "ask": 1.15466,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 101
+    },
+    {
+      "snapshotTime": "2021/10/13 09:11:00",
+      "snapshotTimeUTC": "2021-10-13T07:11:00",
+      "openPrice": {
+        "bid": 1.15462,
+        "ask": 1.15471,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.15458,
+        "ask": 1.15464,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.15472,
+        "ask": 1.15481,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.15454,
+        "ask": 1.15463,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 103
+    },
+    {
+      "snapshotTime": "2021/10/13 09:12:00",
+      "snapshotTimeUTC": "2021-10-13T07:12:00",
+      "openPrice": {
+        "bid": 1.15457,
+        "ask": 1.15463,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.15465,
+        "ask": 1.15471,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.15466,
+        "ask": 1.15473,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.15455,
+        "ask": 1.15462,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 130
+    },
+    {
+      "snapshotTime": "2021/10/13 09:13:00",
+      "snapshotTimeUTC": "2021-10-13T07:13:00",
+      "openPrice": {
+        "bid": 1.15463,
+        "ask": 1.15472,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.15474,
+        "ask": 1.15483,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.15478,
+        "ask": 1.15486,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.15461,
+        "ask": 1.15469,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 88
+    },
+    {
+      "snapshotTime": "2021/10/13 09:14:00",
+      "snapshotTimeUTC": "2021-10-13T07:14:00",
+      "openPrice": {
+        "bid": 1.15475,
+        "ask": 1.15484,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.15475,
+        "ask": 1.15484,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.15482,
+        "ask": 1.15489,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.15473,
+        "ask": 1.15482,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 81
+    },
+    {
+      "snapshotTime": "2021/10/13 09:15:00",
+      "snapshotTimeUTC": "2021-10-13T07:15:00",
+      "openPrice": {
+        "bid": 1.15476,
+        "ask": 1.15485,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.15485,
+        "ask": 1.15494,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.15489,
+        "ask": 1.15498,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.15475,
+        "ask": 1.15482,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 78
+    }
+  ],
+  "instrumentType": "CURRENCIES",
+  "metadata": {
+    "allowance": {
+      "remainingAllowance": 9990,
+      "totalAllowance": 10000,
+      "allowanceExpiry": 604799
+    },
+    "size": 10,
+    "pageData": {
+      "pageSize": 20,
+      "pageNumber": 1,
+      "totalPages": 1
+    }
+  }
+}

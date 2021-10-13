@@ -5,10 +5,10 @@
         ///<Summary>
         /// Unit
         ///</Summary>
-        public string unit { get; set; }
+        public string Unit { get; set; }
         ///<Summary>
         /// Value
         ///</Summary>
-        public decimal? value { get; set; }
+        public decimal? Value { get; set; }
     }
 }

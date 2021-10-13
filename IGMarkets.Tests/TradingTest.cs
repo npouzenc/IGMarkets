@@ -23,7 +23,7 @@ namespace IGMarkets.Tests
 
         #region Tests for /session
         [Test]
-        public void Trading_Login()
+        public void Session_Login()
         {
             // Arrange
             var loginJsonResponse = new
@@ -65,7 +65,7 @@ namespace IGMarkets.Tests
         }
 
         [Test]
-        public void Trading_Logout()
+        public void Session_Logout()
         {
             // Arrange
             ITrading trading = Connect();
@@ -82,7 +82,7 @@ namespace IGMarkets.Tests
         }
 
         [Test]
-        public void Trading_Refresh()
+        public void Session_Refresh()
         {
             // Arrange
             ITrading trading = Connect();
@@ -108,7 +108,7 @@ namespace IGMarkets.Tests
         #region Tests for /markets
 
         [Test]
-        public void Trading_GetMarkets_OutOfRange()
+        public void Markets_GetMarkets_OutOfRange()
         {
             // Arrange
             ITrading trading = Connect();
@@ -120,7 +120,7 @@ namespace IGMarkets.Tests
 
         [Test]
         // https://labs.ig.com/rest-trading-api-reference/service-detail?id=590
-        public async Task Trading_GetMarkets_AllDetails()
+        public async Task Markets_GetMarkets_AllDetails()
         {
             // Arrange
             ITrading trading = Connect();
@@ -165,7 +165,7 @@ namespace IGMarkets.Tests
         }
 
         [Test]
-        public async Task Trading_GetMarkets_SnapshotOnly()
+        public async Task Markets_GetMarkets_SnapshotOnly()
         {
             // Arrange
             ITrading trading = Connect();
@@ -198,7 +198,7 @@ namespace IGMarkets.Tests
         }
 
         [Test]
-        public async Task Trading_GetMarket()
+        public async Task Markets_GetMarket()
         {
             // Arrange
             ITrading trading = Connect();
@@ -227,6 +227,35 @@ namespace IGMarkets.Tests
             Assert.AreEqual("16:04:17", miniEURUSD.Snapshot.UpdateTime);
             Assert.AreEqual("TRADEABLE", miniEURUSD.Snapshot.MarketStatus);
         }
+        #endregion
+
+        #region Tests for /prices
+
+        [TestCase("CS.D.EURUSD.MINI.IP", "2021/10/13 09:06:00", 1.15476f, 1.15485f)]
+        [TestCase("CC.D.LCO.UNC.IP", "2021/10/13 09:13:00", 8290.2f, 8293.0f)]
+        public async Task Prices_GetPrices(string instrument, string snapshotTime, float firstOpenPriceBid, float firstOpenPriceAsk)
+        {
+            // Arrange
+            ITrading trading = Connect();
+            var jsonFile = $"prices_{instrument}.json";
+            httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var prices = await trading.GetPrices(instrument);
+
+            // Assert
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/prices/" + instrument)
+                .WithVerb(HttpMethod.Get)
+                .WithHeader("VERSION", 3)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotEmpty(prices);
+            Assert.AreEqual(10, prices.Count);
+            Assert.AreEqual(snapshotTime, prices[0].SnapshotTime);
+            Assert.AreEqual(firstOpenPriceBid, prices[0].Open.Bid);
+            Assert.AreEqual(firstOpenPriceAsk, prices[0].Open.Ask);
+        }
+
         #endregion
     }
 }

@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace IGMarkets.API
 {
-    public class SearchMarketsResult
+    internal class SearchMarketsResult
     {
         ///<Summary>
         /// List of markets
         ///</Summary>
-        public List<SearchMarketResult> Markets { get; set; }
+        public List<SearchMarketResult> Results { get; set; }
     }
 }

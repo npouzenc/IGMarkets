@@ -131,7 +131,7 @@ namespace IGMarkets
                     .Endpoint("/markets?searchTerm=")
                     .SetQueryParam("searchTerm", searchTerm, true)
                     .GetJsonAsync<SearchMarketsResult>();
-                return searchResults.Markets;   
+                return searchResults.Results;   
             }
             catch (FlurlHttpException ex)
             {
@@ -147,7 +147,7 @@ namespace IGMarkets
         /// <param name="epics">List of markets to retrieve.</param>
         /// <param name="snapshotOnly">If false (default value) then display the market snapshot and minimal instrument data fields. Else display all market details. </param>
         /// <returns>Markets details</returns>
-        public async Task<IList<MarketDetails>> GetMarkets(bool snapshotOnly = false, params string[] epics)
+        public async Task<IList<Market>> GetMarkets(bool snapshotOnly = false, params string[] epics)
         {
             Guard.Against.Null(epics, "epics", nameof(epics));
             Guard.Against.OutOfRange(epics.Length, "epics", 1, 50);
@@ -163,9 +163,9 @@ namespace IGMarkets
                     .Endpoint("/markets", version: 2)
                     .SetQueryParam("epics", epicsQueryParam, true)
                     .SetQueryParam("filter", snapshotOnly ? "SNAPSHOT_ONLY":"ALL")
-                    .GetJsonAsync<MarketsDetails>();
+                    .GetJsonAsync<Markets>();
 
-                return response.MarketDetails;
+                return response.Results;
                 
             }
             catch (FlurlHttpException ex)
@@ -176,7 +176,7 @@ namespace IGMarkets
 
         }
 
-        public async Task<MarketDetails> GetMarket(string epic)
+        public async Task<Market> GetMarket(string epic)
         {
             Guard.Against.NullOrEmpty(epic, nameof(epic));
 
@@ -187,9 +187,36 @@ namespace IGMarkets
 
                 var market = await request
                     .Endpoint("/markets/" + epic, version: 3)
-                    .GetJsonAsync<MarketDetails>();
+                    .GetJsonAsync<Market>();
 
                 return market;
+
+            }
+            catch (FlurlHttpException ex)
+            {
+                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
+            }
+        }
+
+        #endregion
+
+        #region /prices endpoints
+
+        public async Task<IList<Price>> GetPrices(string epic)
+        {
+            Guard.Against.NullOrEmpty(epic, nameof(epic));
+
+            logger.Info($"Looking for prices of the instrument: {epic}");
+            try
+            {
+                var request = new IGRequest(credentials, Session);
+
+                var prices = await request
+                    .Endpoint("/prices/" + epic, version: 3)
+                    .GetJsonAsync<Prices>();
+
+                return prices.Results;
 
             }
             catch (FlurlHttpException ex)

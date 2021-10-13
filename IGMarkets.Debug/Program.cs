@@ -20,9 +20,13 @@ namespace IGMarkets.Debug
             {
                 using (var trading = IG.Connect(identifier, password, apiKey, isDemo: true))
                 {
-                    string epic = "CS.D.EURUSD.MINI.IP";
-                    var market = await trading.GetMarket(epic);
-                    Console.WriteLine($"{epic}: {market.Snapshot.Bid}  -  {market.Snapshot.Offer}");
+                    string epic = "CC.D.LCO.UNC.IP";
+                    var prices = await trading.GetPrices(epic);
+                    Console.WriteLine($"{epic}: {prices.Count} results");
+                    foreach (var price in prices)
+                    {
+                        Console.WriteLine($"\t{price.SnapshotTime}: O:{price.Open} C:{price.Close} H:{price.High} L:{price.Low}");
+                    }
                 }
             }
             catch (Exception ex)
