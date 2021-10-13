@@ -47,7 +47,7 @@ namespace IGMarkets.Tests
             httpTest.RespondWithJson(loginJsonResponse);
         }
 
-        protected ITrading Connect()
+        protected Trading Connect()
         {
             ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session
             var trading = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);

@@ -10,6 +10,7 @@
     <None Remove="Json\markets_CS.D.EURUSD.CFD.IP (snapshot only).json" />
     <None Remove="Json\markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json" />
     <None Remove="Json\markets_CS.D.EURUSD.MINI.IP.json" />
+    <None Remove="Json\prices_CC.D.LCO.UME.IP.json" />
     <None Remove="Json\prices_CC.D.LCO.UNC.IP.json" />
     <None Remove="Json\prices_CS.D.EURUSD.MINI.IP.json" />
   </ItemGroup>
@@ -18,6 +19,7 @@
     <EmbeddedResource Include="Json\markets_CS.D.EURUSD.CFD.IP %28snapshot only%29.json" />
     <EmbeddedResource Include="Json\markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json" />
     <EmbeddedResource Include="Json\markets_CS.D.EURUSD.MINI.IP.json" />
+    <EmbeddedResource Include="Json\prices_CC.D.LCO.UME.IP.json" />
     <EmbeddedResource Include="Json\prices_CC.D.LCO.UNC.IP.json" />
   </ItemGroup>
 

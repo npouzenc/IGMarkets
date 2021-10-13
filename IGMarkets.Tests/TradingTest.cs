@@ -1,6 +1,7 @@
 using Flurl.Http.Testing;
 using NUnit.Framework;
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -68,7 +69,7 @@ namespace IGMarkets.Tests
         public void Session_Logout()
         {
             // Arrange
-            ITrading trading = Connect();
+            var trading = Connect();
 
             // Act
             trading.Dispose();
@@ -82,15 +83,15 @@ namespace IGMarkets.Tests
         }
 
         [Test]
-        public void Session_Refresh()
+        public async Task Session_Refresh()
         {
             // Arrange
-            ITrading trading = Connect();
+            var trading = Connect();
             string refreshToken = trading.Session.OAuthToken.RefreshToken;
             ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session/refresh-token
 
             // Act
-            trading.RefreshSession();
+            await trading.RefreshSession();
 
             // Assert
             Assert.IsTrue(trading.IsConnected);
@@ -111,7 +112,7 @@ namespace IGMarkets.Tests
         public void Markets_GetMarkets_OutOfRange()
         {
             // Arrange
-            ITrading trading = Connect();
+            var trading = Connect();
             string[] epics = new string[51];
 
             // Act && Assert
@@ -123,7 +124,7 @@ namespace IGMarkets.Tests
         public async Task Markets_GetMarkets_AllDetails()
         {
             // Arrange
-            ITrading trading = Connect();
+            var trading = Connect();
             var jsonResponse = LoadResource("markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json");
             httpTest.RespondWith(jsonResponse);
 
@@ -168,7 +169,7 @@ namespace IGMarkets.Tests
         public async Task Markets_GetMarkets_SnapshotOnly()
         {
             // Arrange
-            ITrading trading = Connect();
+            var trading = Connect();
             var jsonResponse = LoadResource("markets_CS.D.EURUSD.CFD.IP (snapshot only).json");
             httpTest.RespondWith(jsonResponse);
 
@@ -201,7 +202,7 @@ namespace IGMarkets.Tests
         public async Task Markets_GetMarket()
         {
             // Arrange
-            ITrading trading = Connect();
+            var trading = Connect();
             var jsonResponse = LoadResource("markets_CS.D.EURUSD.MINI.IP.json");
             httpTest.RespondWith(jsonResponse);
 
@@ -231,29 +232,63 @@ namespace IGMarkets.Tests
 
         #region Tests for /prices
 
-        [TestCase("CS.D.EURUSD.MINI.IP", "2021/10/13 09:06:00", 1.15476f, 1.15485f)]
-        [TestCase("CC.D.LCO.UNC.IP", "2021/10/13 09:13:00", 8290.2f, 8293.0f)]
-        public async Task Prices_GetPrices(string instrument, string snapshotTime, float firstOpenPriceBid, float firstOpenPriceAsk)
+        [TestCase("CS.D.EURUSD.MINI.IP", 10, "2021/10/13 09:06:00", 1.15476f, 1.15485f)]
+        [TestCase("CC.D.LCO.UNC.IP", 10, "2021/10/13 09:13:00", 8290.2f, 8293.0f)]
+        public async Task Prices_GetRecentPrices(string instrument, int numberOfPricePoints, 
+            string snapshotTime, float firstOpenPriceBid, float firstOpenPriceAsk)
         {
             // Arrange
-            ITrading trading = Connect();
+            var trading = Connect();
             var jsonFile = $"prices_{instrument}.json";
             httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
-            var prices = await trading.GetPrices(instrument);
+            var prices = await trading.GetPrices(instrument, Timeframe.MINUTE, numberOfPricePoints);
 
             // Assert
             httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/prices/" + instrument)
                 .WithVerb(HttpMethod.Get)
+                .WithQueryParam("resolution", "MINUTE")
+                .WithQueryParam("max", numberOfPricePoints)
+                .WithQueryParam("pageSize", 0)
                 .WithHeader("VERSION", 3)
                 .WithHeader("X-IG-API-KEY")
                 .WithOAuthBearerToken();
             Assert.IsNotEmpty(prices);
-            Assert.AreEqual(10, prices.Count);
+            Assert.AreEqual(numberOfPricePoints, prices.Count);
             Assert.AreEqual(snapshotTime, prices[0].SnapshotTime);
             Assert.AreEqual(firstOpenPriceBid, prices[0].Open.Bid);
             Assert.AreEqual(firstOpenPriceAsk, prices[0].Open.Ask);
+        }
+
+        [TestCase("CC.D.LCO.UME.IP", 22, "2021/09/01 00:00:00", "2021/09/30 00:00:00")]
+        public async Task Prices_GetPricesBetweenTwoDates(string instrument, int numberOfPricePoints,
+            string firstSnapshotTime, string lastSnapshotTime)
+        {
+            // Arrange
+            var trading = Connect();
+            var jsonFile = $"prices_{instrument}.json";
+            httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var startDate = new DateTime(2021, 09, 01);
+            var endDate = new DateTime(2021, 09, 30);
+            var prices = await trading.GetPrices(instrument, Timeframe.DAY, startDate, endDate);
+
+            // Assert
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/prices/" + instrument)
+                .WithVerb(HttpMethod.Get)
+                .WithQueryParam("resolution", "DAY")
+                .WithQueryParam("from", startDate.ToString("s"))
+                .WithQueryParam("to", endDate.ToString("s"))
+                .WithQueryParam("pageSize", 0)
+                .WithHeader("VERSION", 3)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotEmpty(prices);
+            Assert.AreEqual(numberOfPricePoints, prices.Count);
+            Assert.AreEqual(firstSnapshotTime, prices.First().SnapshotTime);
+            Assert.AreEqual(lastSnapshotTime, prices.Last().SnapshotTime);
         }
 
         #endregion

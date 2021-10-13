@@ -11,7 +11,7 @@ using NLog;
 
 namespace IGMarkets
 {
-    public class Trading : ITrading
+    public class Trading : IDisposable
     {
         /// <summary>
         /// Credentials for IGMarkets.
@@ -203,18 +203,50 @@ namespace IGMarkets
 
         #region /prices endpoints
 
-        public async Task<IList<Price>> GetPrices(string epic)
+        public async Task<IList<Price>> GetPrices(string epic, Timeframe timeframe, int maxNumberOfPricePoints = 10)
         {
             Guard.Against.NullOrEmpty(epic, nameof(epic));
 
-            logger.Info($"Looking for prices of the instrument: {epic}");
+            logger.Info($"Requesting {epic} {maxNumberOfPricePoints} most recent prices (timeframe: {timeframe})");
             try
             {
                 var request = new IGRequest(credentials, Session);
 
                 var prices = await request
                     .Endpoint("/prices/" + epic, version: 3)
-                    .GetJsonAsync<Prices>();
+                    .SetQueryParam("resolution", timeframe)
+                    .SetQueryParam("max", maxNumberOfPricePoints)
+                    .SetQueryParam("pageSize", 0) // disabling paging
+                    .GetJsonAsync<Prices>(); // Care of MaxAllowance of 10,000 points of data per week...
+
+                return prices.Results;
+
+            }
+            catch (FlurlHttpException ex)
+            {
+                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<IList<Price>> GetPrices(string epic, Timeframe timeframe, DateTime from, DateTime to)
+        {
+            Guard.Against.NullOrEmpty(epic, nameof(epic));
+            Guard.Against.Default<DateTime>(from, nameof(from));
+            Guard.Against.Default<DateTime>(to, nameof(to));
+
+            logger.Info($"Requesting {epic} prices  between {from.ToUniversalTime()} and {to.ToUniversalTime()} (timeframe: {timeframe})");
+            try
+            {
+                var request = new IGRequest(credentials, Session);
+
+                var prices = await request
+                    .Endpoint("/prices/" + epic, version: 3)
+                    .SetQueryParam("resolution", timeframe)
+                    .SetQueryParam("from", from.ToString("s"))
+                    .SetQueryParam("to", to.ToString("s"))
+                    .SetQueryParam("pageSize", 0) // disabling paging
+                    .GetJsonAsync<Prices>(); // Care of MaxAllowance of 10,000 points of data per week...
 
                 return prices.Results;
 
