@@ -198,35 +198,35 @@ namespace IGMarkets.Tests
             Assert.AreEqual(-0.00096, cfdEURUSD.Snapshot.NetChange);
         }
 
-        [Test]
-        public async Task Markets_GetMarket()
+        [TestCase("CS.D.EURUSD.MINI.IP")]
+        public async Task Markets_GetMarket(string instrument)
         {
             // Arrange
             var trading = Connect();
-            var jsonResponse = LoadResource("markets_CS.D.EURUSD.MINI.IP.json");
-            httpTest.RespondWith(jsonResponse);
+            var jsonFile = $"markets_{instrument}.json";
+            httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
-            var miniEURUSD = await trading.GetMarket("CS.D.EURUSD.MINI.IP");
+            var market = await trading.GetMarket(instrument);
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets/CS.D.EURUSD.MINI.IP")
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets/" + instrument)
                 .WithVerb(HttpMethod.Get)
                 .WithHeader("VERSION")
                 .WithHeader("X-IG-API-KEY")
                 .WithOAuthBearerToken();
-            Assert.IsNotNull(miniEURUSD);
-            Assert.IsNotNull(miniEURUSD.Instrument);
-            Assert.IsNotNull(miniEURUSD.Snapshot);
-            Assert.AreEqual("CS.D.EURUSD.MINI.IP", miniEURUSD.Instrument.Epic);
-            Assert.AreEqual("CURRENCIES", miniEURUSD.Instrument.Type);
-            Assert.AreEqual("10000", miniEURUSD.Instrument.ContractSize);
-            Assert.AreEqual(1.15402, miniEURUSD.Snapshot.Bid);
-            Assert.AreEqual(1.15411, miniEURUSD.Snapshot.Offer);
-            Assert.AreEqual(1.15708, miniEURUSD.Snapshot.High);
-            Assert.AreEqual(1.15329, miniEURUSD.Snapshot.Low);
-            Assert.AreEqual("16:04:17", miniEURUSD.Snapshot.UpdateTime);
-            Assert.AreEqual("TRADEABLE", miniEURUSD.Snapshot.MarketStatus);
+            Assert.IsNotNull(market);
+            Assert.IsNotNull(market.Instrument);
+            Assert.IsNotNull(market.Snapshot);
+            Assert.AreEqual(instrument, market.Instrument.Epic);
+            Assert.AreEqual("CURRENCIES", market.Instrument.Type);
+            Assert.AreEqual("10000", market.Instrument.ContractSize);
+            Assert.AreEqual(1.15402, market.Snapshot.Bid);
+            Assert.AreEqual(1.15411, market.Snapshot.Offer);
+            Assert.AreEqual(1.15708, market.Snapshot.High);
+            Assert.AreEqual(1.15329, market.Snapshot.Low);
+            Assert.AreEqual("16:04:17", market.Snapshot.UpdateTime);
+            Assert.AreEqual("TRADEABLE", market.Snapshot.MarketStatus);
         }
         #endregion
 
