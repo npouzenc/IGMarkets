@@ -55,15 +55,20 @@ namespace IGMarkets
         /// <returns></returns>
         public async Task Login(string identifier, string password, string apiKey, bool isDemo = false)
         {
-            logger.Info($"Creating a dealing session with IG Markets for identifier '{identifier}'");
-            this.credentials = new Credentials(identifier, password, apiKey, isDemo);
+            await Login(new Credentials(identifier, password, apiKey, isDemo));
+        }
 
+        public async Task Login(Credentials credentials) 
+        {
+            Guard.Against.Null(credentials, nameof(credentials));
+            logger.Info($"Creating a dealing session with IG Markets for identifier '{credentials.Identifier}'");
+            this.credentials = credentials;
             try
             {
                 var request = new IGRequest(credentials, Session);
                 this.Session = await request
                     .Endpoint("/session", 3)
-                    .PostJsonAsync(new { identifier = identifier, password = password })
+                    .PostJsonAsync(new { identifier = credentials.Identifier, password = credentials.Password })
                     .ReceiveJson<Session>();
 
                 IsConnected = true;
@@ -113,7 +118,7 @@ namespace IGMarkets
         }
         #endregion
 
-        #region /markets REST API endpoints
+        #region /markets endpoints
 
         public async Task<IList<SearchMarketResult>> SearchMarkets(string searchTerm)
         {
