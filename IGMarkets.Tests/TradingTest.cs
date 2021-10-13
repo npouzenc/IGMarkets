@@ -7,21 +7,12 @@ using System.Threading.Tasks;
 namespace IGMarkets.Tests
 {
     [TestFixture]
-    public class TradingTest
+    public class TradingTest : Helpers
     {
-        private HttpTest httpTest;
-
         [SetUp]
         public void Setup()
         {
             httpTest = new HttpTest();
-        }
-
-        private ITrading Connect()
-        {
-            ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session
-            var trading = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
-            return trading;
         }
 
         [TearDown]
@@ -236,42 +227,6 @@ namespace IGMarkets.Tests
             Assert.AreEqual("16:04:17", miniEURUSD.Snapshot.UpdateTime);
             Assert.AreEqual("TRADEABLE", miniEURUSD.Snapshot.MarketStatus);
         }
-        #endregion
-
-        #region Helper methods
-
-        private void ArrangeHttpSessionResponse(bool demo)
-        {
-            var loginJsonResponse = new
-            {
-                clientId = 3,
-                accountId = "XXXXX",
-                timezoneOffset = 1,
-                lightstreamerEndpoint = demo ? "https://demo-apd.marketdatasystems.com": "https://apd.marketdatasystems.com",
-                oauthToken = new
-                {
-                    access_token = Guid.NewGuid(),
-                    refresh_token = Guid.NewGuid(),
-                    scope = "profile",
-                    token_type = "Bearer",
-                    expires_in = 60
-                }
-            };
-            httpTest.RespondWithJson(loginJsonResponse);
-        }
-
-
-        private string LoadResource(string filename)
-        {
-            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            using (var stream = assembly.GetManifestResourceStream("IGMarkets.Tests.Json." + filename))
-            using (var reader = new System.IO.StreamReader(stream))
-            {
-                string result = reader.ReadToEnd();
-                return result.Trim().Replace("\r\n", string.Empty).Replace("\t", string.Empty);
-            }
-        }
-
         #endregion
     }
 }

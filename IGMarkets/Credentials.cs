@@ -37,7 +37,7 @@ namespace IGMarkets
 
         public override string ToString()
         {
-            string message = $"Credentials for user {Identifier} and API key:{ApiKey.Substring(1, 5)}";
+            string message = $"Credentials for user {Identifier} and API key:{ApiKey.Substring(1, 5)}...";
             return IsDemo ? message:message+" with DEMO account";
         }
     }
