@@ -1,0 +1,19 @@
+{
+  "clientSentiments": [
+    {
+      "marketId": "DE30",
+      "longPositionPercentage": 56.0,
+      "shortPositionPercentage": 44.0
+    },
+    {
+      "marketId": "EURUSD",
+      "longPositionPercentage": 67.0,
+      "shortPositionPercentage": 33.0
+    },
+    {
+      "marketId": "FR40",
+      "longPositionPercentage": 60.0,
+      "shortPositionPercentage": 40.0
+    }
+  ]
+}

@@ -260,6 +260,36 @@ namespace IGMarkets
 
         #endregion
 
+        #region /clientsentiment endpoints
+
+        public async Task<IList<ClientSentiment>> GetSentiments(params string[] marketIds)
+        {
+            Guard.Against.NullOrEmpty(marketIds, nameof(marketIds));
+
+            string markets = string.Join(",", marketIds);
+
+            logger.Info($"Requesting client sentiment for the following market: {markets}");
+            try
+            {
+                var request = new IGRequest(credentials, Session);
+
+                var sentiments = await request
+                    .Endpoint("/clientsentiment?marketIds=" + markets)
+                    .GetJsonAsync<ClientSentiments>();
+
+                return sentiments.Results;
+
+            }
+            catch (FlurlHttpException ex)
+            {
+                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
+            }
+        }
+
+
+        #endregion
+
         #region IDisposable
 
         public async void Dispose()

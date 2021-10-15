@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace IGMarkets.API
 {
+    [DebuggerDisplay("{Type}= Epic:{Epic}, MarketId={MarketId}")]
     public class InstrumentData
     {
         ///<Summary>

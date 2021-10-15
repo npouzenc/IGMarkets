@@ -11,6 +11,13 @@ namespace IGMarkets.Debug
     {
         static Trading trading;
 
+        const string BRENT = "CC.D.LCO.UNC.IP";
+        const string CAC40 = "IX.D.CAC.IMF.IP";
+        const string DAX40 = "IX.D.DAX.IDF.IP";
+        const string DOW30 = "IX.D.DOW.IDF.IP";
+        const string EURUSD = "CS.D.EURUSD.CFD.IP";
+        const string FTSE = "IX.D.FTSE.IFE.IP";
+
         static async Task Main(string[] args)
         {
             var configuration = BuildConfiguration();
@@ -21,7 +28,8 @@ namespace IGMarkets.Debug
             try
             {
                 trading = IG.Connect(identifier, password, apiKey, isDemo: true);
-                await GetBrentPrices(new DateTime(2021, 09, 01), new DateTime(2021, 09, 30));
+                //await GetBrentPrices(new DateTime(2021, 09, 01), new DateTime(2021, 09, 30));
+                await GetSentiments();
             }
             catch (Exception ex)
             {
@@ -33,6 +41,16 @@ namespace IGMarkets.Debug
             {
                 trading.Dispose();
             }
+        }
+
+        private static async Task GetSentiments()
+        {
+            var market = await trading.GetMarket(DAX40);
+            var sentiments = await trading.GetSentiments("FR40", "DE30", "EURUSD");
+            foreach (var sentiment in sentiments)
+            {
+                Console.WriteLine($"\t{sentiment.MarketId}: [LONG:{sentiment.LongPositionPercentage} SHORT:{sentiment.ShortPositionPercentage}]");
+            }            
         }
 
         private static async Task GetLastBrentDailyPrices()

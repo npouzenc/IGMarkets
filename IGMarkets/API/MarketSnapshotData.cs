@@ -1,5 +1,8 @@
-﻿namespace IGMarkets.API
+﻿using System.Diagnostics;
+
+namespace IGMarkets.API
 {
+    [DebuggerDisplay("{MarketStatus}= Bid:{Bid}, Offer:{Offer}")]
     public class MarketSnapshotData
     {
         ///<Summary>

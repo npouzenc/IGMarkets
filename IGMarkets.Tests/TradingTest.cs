@@ -109,7 +109,7 @@ namespace IGMarkets.Tests
         #region Tests for /markets
 
         [Test]
-        public void Markets_GetMarkets_OutOfRange()
+        public void Markets_GetMarkets_ThrowArgumentOutOfRangeException()
         {
             // Arrange
             var trading = Connect();
@@ -129,7 +129,7 @@ namespace IGMarkets.Tests
             httpTest.RespondWith(jsonResponse);
 
             // Act
-            var marketsDetails = await trading.GetMarkets(snapshotOnly: false, 
+            var marketsDetails = await trading.GetMarkets(snapshotOnly: false,
                 "CS.D.EURUSD.CFD.IP", "CS.D.EURUSD.MINI.IP");
 
             // Assert
@@ -234,7 +234,7 @@ namespace IGMarkets.Tests
 
         [TestCase("CS.D.EURUSD.MINI.IP", 10, "2021/10/13 09:06:00", 1.15476f, 1.15485f)]
         [TestCase("CC.D.LCO.UNC.IP", 10, "2021/10/13 09:13:00", 8290.2f, 8293.0f)]
-        public async Task Prices_GetRecentPrices(string instrument, int numberOfPricePoints, 
+        public async Task Prices_GetRecentPrices(string instrument, int numberOfPricePoints,
             string snapshotTime, float firstOpenPriceBid, float firstOpenPriceAsk)
         {
             // Arrange
@@ -289,6 +289,86 @@ namespace IGMarkets.Tests
             Assert.AreEqual(numberOfPricePoints, prices.Count);
             Assert.AreEqual(firstSnapshotTime, prices.First().SnapshotTime);
             Assert.AreEqual(lastSnapshotTime, prices.Last().SnapshotTime);
+        }
+
+        #endregion
+
+        #region Tests for /clientsentiment
+
+        //clientsentiment?marketIds=FR40,DE30,EURUSD
+
+        [Test]
+        public async Task ClientSentiment_GetSentiments()
+        {
+            // Arrange
+            var trading = Connect();
+            var jsonFile = $"clientsentiments.json";
+            httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var sentiments = await trading.GetSentiments("FR40", "DE30", "EURUSD");
+
+            // Assert
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/clientsentiment")
+                .WithVerb(HttpMethod.Get)
+                .WithQueryParam("marketIds", "FR40,DE30,EURUSD") // not in alphabetic order
+                .WithHeader("VERSION", 1)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotNull(sentiments);
+            Assert.IsNotEmpty(sentiments);
+            Assert.AreEqual(3, sentiments.Count);
+            var de30 = sentiments[0]; // DE30
+            var eurusd = sentiments[1]; // EURUSD
+            var cac40 = sentiments[2]; // FR40
+            Assert.AreEqual(cac40.MarketId, "FR40");
+            Assert.AreEqual(cac40.LongPositionPercentage, 60.0);
+            Assert.AreEqual(cac40.ShortPositionPercentage, 40.0);
+            Assert.AreEqual(eurusd.MarketId, "EURUSD");
+            Assert.AreEqual(eurusd.LongPositionPercentage, 67.0);
+            Assert.AreEqual(eurusd.ShortPositionPercentage, 33.0);
+            Assert.AreEqual(de30.MarketId, "DE30");
+            Assert.AreEqual(de30.LongPositionPercentage, 56.0);
+            Assert.AreEqual(de30.ShortPositionPercentage, 44.0);
+        }
+
+
+        [Test]
+        public async Task ClientSentiment_GetSentimentsForUnknownMarket()
+        {
+            // Arrange
+            var trading = Connect();
+            var jsonFile = $"clientsentiments_unknown.json";
+            httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var sentiments = await trading.GetSentiments("XXXXXXXX");
+
+            // Assert
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/clientsentiment")
+                .WithVerb(HttpMethod.Get)
+                .WithQueryParam("marketIds", "XXXXXXXX") // Should raise an error?
+                .WithHeader("VERSION", 1)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotNull(sentiments);
+            Assert.IsNotEmpty(sentiments);
+            Assert.AreEqual(1, sentiments.Count);
+            var unknown = sentiments[0]; // XXXXXXXX
+            Assert.AreEqual(unknown.MarketId, "XXXXXXXX");
+            Assert.AreEqual(unknown.LongPositionPercentage, 0.0);
+            Assert.AreEqual(unknown.ShortPositionPercentage, 0.0);
+        }
+
+        [Test]
+        public void ClientSentiment_GetSentimentsThrowsArgumentException()
+        {
+            // Arrange
+            var trading = Connect();
+            string[] marketsIds = new string[0];
+
+            // Act && Assert
+            Assert.ThrowsAsync<ArgumentException>(async () => await trading.GetSentiments(marketsIds));
         }
 
         #endregion

@@ -1,0 +1,9 @@
+{
+  "clientSentiments": [
+    {
+      "marketId": "XXXXXXXX", // Unknown Market id 
+      "longPositionPercentage": 0.0,
+      "shortPositionPercentage": 0.0
+    }
+  ]
+}
