@@ -294,15 +294,39 @@ namespace IGMarkets.Tests
         #endregion
 
         #region Tests for /clientsentiment
-
-        //clientsentiment?marketIds=FR40,DE30,EURUSD
-
         [Test]
-        public async Task ClientSentiment_GetSentiments()
+        public async Task ClientSentiment_GetSentimentsFor_OnlyOneMarket()
         {
             // Arrange
             var trading = Connect();
-            var jsonFile = $"clientsentiments.json";
+            var jsonFile = $"clientsentiment_FR40.json";
+            httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var sentiments = await trading.GetSentiments("FR40");
+
+            // Assert
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/clientsentiment")
+                .WithVerb(HttpMethod.Get)
+                .WithQueryParam("marketIds", "FR40") 
+                .WithHeader("VERSION", 1)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotNull(sentiments);
+            Assert.IsNotEmpty(sentiments);
+            Assert.AreEqual(1, sentiments.Count);
+            var cac40 = sentiments.First(); // FR40
+            Assert.AreEqual(cac40.MarketId, "FR40");
+            Assert.AreEqual(cac40.LongPositionPercentage, 60.0);
+            Assert.AreEqual(cac40.ShortPositionPercentage, 40.0);
+        }
+
+        [Test]
+        public async Task ClientSentiment_GetSentimentsForMultipleMarkets()
+        {
+            // Arrange
+            var trading = Connect();
+            var jsonFile = $"clientsentiment_DE30,EURUSD,FR40.json";
             httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
@@ -338,7 +362,7 @@ namespace IGMarkets.Tests
         {
             // Arrange
             var trading = Connect();
-            var jsonFile = $"clientsentiments_unknown.json";
+            var jsonFile = $"clientsentiments_UNKNOWN.json";
             httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act

@@ -1,0 +1,9 @@
+{
+  "clientSentiments": [
+    {
+      "marketId": "FR40",
+      "longPositionPercentage": 60.0,
+      "shortPositionPercentage": 40.0
+    }
+  ]
+}
