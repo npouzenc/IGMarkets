@@ -1,7 +1,7 @@
 ﻿{
   "watchlists": [
     {
-      "id": "5222762",
+      "id": "5222222",
       "name": "My Watchlist",
       "editable": true,
       "deleteable": false,
@@ -15,7 +15,7 @@
       "defaultSystemWatchlist": true
     },
     {
-      "id": "5222763",
+      "id": "5222223",
       "name": " Récent",
       "editable": false,
       "deleteable": false,
