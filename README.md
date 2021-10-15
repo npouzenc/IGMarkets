@@ -1,4 +1,4 @@
-# IG Markets
+# Unofficial IG Markets Trading API for C# or dotnet apps
 
 Unofficial IG Markets Trading API for C# or dotnet based applications. IGMarkets is a modern, fluent, asynchronous and portable library for .NET applications to consume IGMarkets API.
 
