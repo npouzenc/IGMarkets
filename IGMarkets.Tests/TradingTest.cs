@@ -396,5 +396,51 @@ namespace IGMarkets.Tests
         }
 
         #endregion
+
+        #region Tests for /watchlists
+
+        [Test]
+        public async Task Watchlists_GetAllWatchlists()
+        {
+            // Arrange
+            var trading = Connect();
+            var jsonFile = $"watchlists.json";
+            httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var watchlists = await trading.GetWatchlists();
+
+            // Assert
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/watchlists")
+                .WithVerb(HttpMethod.Get)
+                .WithHeader("VERSION", 1)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotNull(watchlists);
+            Assert.IsNotEmpty(watchlists);
+            Assert.AreEqual(3, watchlists.Count);
+            var myWatchlist = watchlists.First(w => w.Id == "5222762");
+            Assert.AreEqual(myWatchlist.DefaultSystemWatchlist, false);
+            Assert.AreEqual(myWatchlist.Deleteable, false);
+            Assert.AreEqual(myWatchlist.Editable, true);
+            Assert.AreEqual(myWatchlist.Name, "My Watchlist");
+            Assert.AreEqual(myWatchlist.Id, "5222762");
+            
+            var popularMarkets = watchlists.First(w => w.Id == "Popular Markets");
+            Assert.AreEqual(popularMarkets.DefaultSystemWatchlist, true);
+            Assert.AreEqual(popularMarkets.Deleteable, false);
+            Assert.AreEqual(popularMarkets.Editable, false);
+            Assert.AreEqual(popularMarkets.Name, "Marchés populaires"); // French!
+            Assert.AreEqual(popularMarkets.Id, "Popular Markets");
+            
+            var recents = watchlists.First(w => w.Id == "5222763");
+            Assert.AreEqual(recents.DefaultSystemWatchlist, false);
+            Assert.AreEqual(recents.Deleteable, false);
+            Assert.AreEqual(recents.Editable, false);
+            Assert.AreEqual(recents.Name, " Récent"); // French with a space that hasn't been trimmed...
+            Assert.AreEqual(recents.Id, "5222763");
+        }
+
+        #endregion
     }
 }

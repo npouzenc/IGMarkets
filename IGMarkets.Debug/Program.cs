@@ -29,7 +29,8 @@ namespace IGMarkets.Debug
             {
                 trading = IG.Connect(identifier, password, apiKey, isDemo: true);
                 //await GetBrentPrices(new DateTime(2021, 09, 01), new DateTime(2021, 09, 30));
-                await GetSentiments();
+                //await GetSentiments();
+                await GetWatchlists();
             }
             catch (Exception ex)
             {
@@ -41,6 +42,16 @@ namespace IGMarkets.Debug
             {
                 trading.Dispose();
             }
+        }
+
+        private static async Task GetWatchlists()
+        {
+            var watchlists = await trading.GetWatchlists();
+            foreach (var watchlist in watchlists)
+            {
+                Console.WriteLine($"\t{watchlist.Id}: {watchlist.Name} (editable? {watchlist.Editable} - deletable? {watchlist.Deleteable}");
+            }
+            
         }
 
         private static async Task GetSentiments()

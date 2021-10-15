@@ -1,0 +1,25 @@
+﻿{
+  "watchlists": [
+    {
+      "id": "5222762",
+      "name": "My Watchlist",
+      "editable": true,
+      "deleteable": false,
+      "defaultSystemWatchlist": false
+    },
+    {
+      "id": "Popular Markets",
+      "name": "Marchés populaires",
+      "editable": false,
+      "deleteable": false,
+      "defaultSystemWatchlist": true
+    },
+    {
+      "id": "5222763",
+      "name": " Récent",
+      "editable": false,
+      "deleteable": false,
+      "defaultSystemWatchlist": false
+    }
+  ]
+}

@@ -287,6 +287,30 @@ namespace IGMarkets
             }
         }
 
+        #endregion
+
+        #region /watchlists endpoints
+
+        public async Task<IList<Watchlist>> GetWatchlists()
+        {
+            logger.Info($"Requesting watchlists for the account: {this.Session.AccountId}");
+            try
+            {
+                var request = new IGRequest(credentials, Session);
+
+                var watchlists = await request
+                    .Endpoint("/watchlists")
+                    .GetJsonAsync<Watchlists>();
+
+                return watchlists.Results;
+
+            }
+            catch (FlurlHttpException ex)
+            {
+                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
+            }
+        }
 
         #endregion
 

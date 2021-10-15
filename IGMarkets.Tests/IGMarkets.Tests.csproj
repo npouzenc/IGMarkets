@@ -16,6 +16,7 @@
     <None Remove="Json\prices_CC.D.LCO.UME.IP.json" />
     <None Remove="Json\prices_CC.D.LCO.UNC.IP.json" />
     <None Remove="Json\prices_CS.D.EURUSD.MINI.IP.json" />
+    <None Remove="Json\watchlists.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +28,7 @@
     <EmbeddedResource Include="Json\markets_CS.D.EURUSD.MINI.IP.json" />
     <EmbeddedResource Include="Json\prices_CC.D.LCO.UME.IP.json" />
     <EmbeddedResource Include="Json\prices_CC.D.LCO.UNC.IP.json" />
+    <EmbeddedResource Include="Json\watchlists.json" />
   </ItemGroup>
 
   <ItemGroup>
