@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace IGMarkets.Debug
@@ -50,6 +51,16 @@ namespace IGMarkets.Debug
             foreach (var watchlist in watchlists)
             {
                 Console.WriteLine($"\t{watchlist.Id}: {watchlist.Name} (editable? {watchlist.Editable} - deletable? {watchlist.Deleteable}");
+            }
+            if (watchlists.Count > 0)
+            {
+                var watchlist = watchlists.First();
+                var markets = await trading.GetWatchlist(watchlist.Id);
+                Console.WriteLine($"\t{watchlist.Id}: {watchlist.Name} contains the following markets:");
+                foreach (var market in markets)
+                {
+                    Console.WriteLine($"\t\tMarket: {market.Instrument.Name} ({market.Instrument.Epic})");
+                }
             }
             
         }

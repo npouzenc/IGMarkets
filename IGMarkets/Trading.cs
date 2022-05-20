@@ -131,7 +131,7 @@ namespace IGMarkets
                     .Endpoint("/markets?searchTerm=")
                     .SetQueryParam("searchTerm", searchTerm, true)
                     .GetJsonAsync<SearchMarketsResult>();
-                return searchResults.Results;   
+                return searchResults.Results ?? new List<SearchMarketResult>();   
             }
             catch (FlurlHttpException ex)
             {
@@ -165,7 +165,7 @@ namespace IGMarkets
                     .SetQueryParam("filter", snapshotOnly ? "SNAPSHOT_ONLY":"ALL")
                     .GetJsonAsync<Markets>();
 
-                return response.Results;
+                return response.Results ?? new List<Market>();
                 
             }
             catch (FlurlHttpException ex)
@@ -219,7 +219,7 @@ namespace IGMarkets
                     .SetQueryParam("pageSize", 0) // disabling paging
                     .GetJsonAsync<Prices>(); // Care of MaxAllowance of 10,000 points of data per week...
 
-                return prices.Results;
+                return prices.Results ?? new List<Price>();
 
             }
             catch (FlurlHttpException ex)
@@ -248,7 +248,7 @@ namespace IGMarkets
                     .SetQueryParam("pageSize", 0) // disabling paging
                     .GetJsonAsync<Prices>(); // Care of MaxAllowance of 10,000 points of data per week...
 
-                return prices.Results;
+                return prices.Results ?? new List<Price>();
 
             }
             catch (FlurlHttpException ex)
@@ -302,7 +302,30 @@ namespace IGMarkets
                     .Endpoint("/watchlists")
                     .GetJsonAsync<Watchlists>();
 
-                return watchlists.Results;
+                return watchlists.Results ?? new List<Watchlist>();
+
+            }
+            catch (FlurlHttpException ex)
+            {
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
+            }
+        }
+
+        public async Task<IList<Market>> GetWatchlist(string id)
+        {
+            Guard.Against.NullOrEmpty(id, nameof(id));
+
+            _logger.Info($"Requesting watchlist id:{id}");
+            try
+            {
+                var request = new IGRequest(_credentials, Session);
+
+                var markets = await request
+                    .Endpoint("/watchlists/" + id)
+                    .GetJsonAsync<Markets>();
+
+                return markets.Results ?? new List<Market>();
 
             }
             catch (FlurlHttpException ex)
