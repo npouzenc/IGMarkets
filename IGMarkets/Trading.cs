@@ -331,7 +331,7 @@ namespace IGMarkets
         {
             if (logger.IsDebugEnabled)
             {
-                logger.Debug($"--> {call.Request.Verb} {call.Request.Url}: {call.RequestBody}");
+                logger.Debug(ReadSanitizedRequest(call));
             }
         }
 
@@ -339,9 +339,23 @@ namespace IGMarkets
         {
             if (logger.IsDebugEnabled)
             {
-                var response = await call.Response.ResponseMessage.Content.ReadAsStringAsync();
-                logger.Debug($"<-- {call}: {response}");
+                logger.Debug(await ReadResponse(call));
             }
+        }
+
+        private string ReadSanitizedRequest(FlurlCall call)
+        {
+            string verb = call.Request.Verb.ToString();
+            string path = call.Request.Url.Path;
+            string body = path == "/gateway/deal/session" ? "*******" : call.RequestBody.JsonPrettify();
+            
+            return $"--> {verb} {call.Request.Url}:\n{body}";
+        }
+
+        private async Task<string> ReadResponse(FlurlCall call)
+        {
+            var response = await call.Response.ResponseMessage.Content.ReadAsStringAsync();
+            return $"<-- {call}: {response}";
         }
 
         #endregion
