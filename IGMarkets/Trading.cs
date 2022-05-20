@@ -349,7 +349,7 @@ namespace IGMarkets
             string path = call.Request.Url.Path;
             string body = path == "/gateway/deal/session" ? "*******" : call.RequestBody.JsonPrettify();
             
-            return $"--> {verb} {call.Request.Url}:\n{body}";
+            return $"--> {verb} {call.Request.Url}: {body}";
         }
 
         private async Task<string> ReadResponse(FlurlCall call)
