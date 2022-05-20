@@ -16,12 +16,12 @@ namespace IGMarkets
         /// <summary>
         /// Credentials for IGMarkets.
         /// </summary>
-        private Credentials credentials;
+        private Credentials _credentials;
 
         /// <summary>
         /// NLog
         /// </summary>
-        private Logger logger = LogManager.GetCurrentClassLogger();
+        private Logger _logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Current session once connected.
@@ -61,8 +61,8 @@ namespace IGMarkets
         public async Task Login(Credentials credentials) 
         {
             Guard.Against.Null(credentials, nameof(credentials));
-            logger.Info($"Creating a dealing session with IG Markets for identifier '{credentials.Identifier}'");
-            this.credentials = credentials;
+            _logger.Info($"Creating a dealing session with IG Markets for identifier '{credentials.Identifier}'");
+            this._credentials = credentials;
             try
             {
                 var request = new IGRequest(credentials, Session);
@@ -75,16 +75,16 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
             }
         }
 
         public async Task Logout()
         {
-            logger.Info($"Closing the dealing session on account '{Session.AccountId}' for identifier '{credentials.Identifier}'");
+            _logger.Info($"Closing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
             try
             {
-                var request = new IGRequest(credentials, Session);
+                var request = new IGRequest(_credentials, Session);
                 await request
                     .Endpoint("/session")
                     .DeleteAsync();
@@ -93,16 +93,16 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
             }
         }
 
         public async Task RefreshSession()
         {
-            logger.Info($"Refreshing the dealing session on account '{Session.AccountId}' for identifier '{credentials.Identifier}'");
+            _logger.Info($"Refreshing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
             try
             {
-                var request = new IGRequest(credentials, Session);
+                var request = new IGRequest(_credentials, Session);
 
                 Session = await request
                     .Endpoint("/session/refresh-token")
@@ -113,7 +113,7 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
             }
         }
         #endregion
@@ -122,10 +122,10 @@ namespace IGMarkets
 
         public async Task<IList<SearchMarketResult>> SearchMarkets(string searchTerm)
         {
-            logger.Info($"Searching markets with the term '{searchTerm}'");
+            _logger.Info($"Searching markets with the term '{searchTerm}'");
             try
             {
-                var request = new IGRequest(credentials, Session);
+                var request = new IGRequest(_credentials, Session);
 
                 var searchResults = await request
                     .Endpoint("/markets?searchTerm=")
@@ -135,7 +135,7 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
                 throw;
             }
 
@@ -154,10 +154,10 @@ namespace IGMarkets
 
             string epicsQueryParam = string.Join(',', epics);
 
-            logger.Info($"Looking for the following markets: {epics}");
+            _logger.Info($"Looking for the following markets: {epics}");
             try
             {
-                var request = new IGRequest(credentials, Session);
+                var request = new IGRequest(_credentials, Session);
 
                 var response = await request
                     .Endpoint("/markets", version: 2)
@@ -170,7 +170,7 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
                 throw;
             }
 
@@ -180,10 +180,10 @@ namespace IGMarkets
         {
             Guard.Against.NullOrEmpty(epic, nameof(epic));
 
-            logger.Info($"Looking for the following market: {epic}");
+            _logger.Info($"Looking for the following market: {epic}");
             try
             {
-                var request = new IGRequest(credentials, Session);
+                var request = new IGRequest(_credentials, Session);
 
                 var market = await request
                     .Endpoint("/markets/" + epic, version: 3)
@@ -194,7 +194,7 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
                 throw;
             }
         }
@@ -207,10 +207,10 @@ namespace IGMarkets
         {
             Guard.Against.NullOrEmpty(epic, nameof(epic));
 
-            logger.Info($"Requesting {epic} {maxNumberOfPricePoints} most recent prices (timeframe: {timeframe})");
+            _logger.Info($"Requesting {epic} {maxNumberOfPricePoints} most recent prices (timeframe: {timeframe})");
             try
             {
-                var request = new IGRequest(credentials, Session);
+                var request = new IGRequest(_credentials, Session);
 
                 var prices = await request
                     .Endpoint("/prices/" + epic, version: 3)
@@ -224,7 +224,7 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
                 throw;
             }
         }
@@ -235,10 +235,10 @@ namespace IGMarkets
             Guard.Against.Default<DateTime>(from, nameof(from));
             Guard.Against.Default<DateTime>(to, nameof(to));
 
-            logger.Info($"Requesting {epic} prices  between {from.ToUniversalTime()} and {to.ToUniversalTime()} (timeframe: {timeframe})");
+            _logger.Info($"Requesting {epic} prices  between {from.ToUniversalTime()} and {to.ToUniversalTime()} (timeframe: {timeframe})");
             try
             {
-                var request = new IGRequest(credentials, Session);
+                var request = new IGRequest(_credentials, Session);
 
                 var prices = await request
                     .Endpoint("/prices/" + epic, version: 3)
@@ -253,7 +253,7 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
                 throw;
             }
         }
@@ -268,10 +268,10 @@ namespace IGMarkets
 
             string markets = string.Join(",", marketIds);
 
-            logger.Info($"Requesting client sentiment for the following market: {markets}");
+            _logger.Info($"Requesting client sentiment for the following market: {markets}");
             try
             {
-                var request = new IGRequest(credentials, Session);
+                var request = new IGRequest(_credentials, Session);
 
                 var sentiments = await request
                     .Endpoint("/clientsentiment?marketIds=" + markets)
@@ -282,7 +282,7 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
                 throw;
             }
         }
@@ -293,10 +293,10 @@ namespace IGMarkets
 
         public async Task<IList<Watchlist>> GetWatchlists()
         {
-            logger.Info($"Requesting watchlists for the account: {this.Session.AccountId}");
+            _logger.Info($"Requesting watchlists for the account: {this.Session.AccountId}");
             try
             {
-                var request = new IGRequest(credentials, Session);
+                var request = new IGRequest(_credentials, Session);
 
                 var watchlists = await request
                     .Endpoint("/watchlists")
@@ -307,7 +307,7 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
                 throw;
             }
         }
@@ -329,17 +329,17 @@ namespace IGMarkets
 
         private void LogRequest(FlurlCall call)
         {
-            if (logger.IsDebugEnabled)
+            if (_logger.IsDebugEnabled)
             {
-                logger.Debug(ReadSanitizedRequest(call));
+                _logger.Debug(ReadSanitizedRequest(call));
             }
         }
 
         private async Task LogResponse(FlurlCall call)
         {
-            if (logger.IsDebugEnabled)
+            if (_logger.IsDebugEnabled)
             {
-                logger.Debug(await ReadResponse(call));
+                _logger.Debug(await ReadResponse(call));
             }
         }
 
