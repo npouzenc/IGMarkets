@@ -293,7 +293,7 @@ namespace IGMarkets
 
         public async Task<IList<Watchlist>> GetWatchlists()
         {
-            _logger.Info($"Requesting watchlists for the account: {this.Session.AccountId}");
+            _logger.Info($"Requesting watchlists for the account: {Session.AccountId}");
             try
             {
                 var request = new IGRequest(_credentials, Session);
