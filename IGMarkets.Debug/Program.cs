@@ -23,7 +23,7 @@ namespace IGMarkets.Debug
             var configuration = BuildConfiguration();
             var identifier = configuration["IG:login"];
             var password = configuration["IG:password"];
-            var apiKey = configuration["IG:key"];
+            var apiKey = configuration["IG:apiKey"];
                         
             try
             {
