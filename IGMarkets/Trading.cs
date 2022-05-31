@@ -165,7 +165,7 @@ namespace IGMarkets
                     .SetQueryParam("filter", snapshotOnly ? "SNAPSHOT_ONLY":"ALL")
                     .GetJsonAsync<Markets>();
 
-                return response.Results ?? new List<Market>();
+                return response.MarketDetails ?? new List<Market>();
                 
             }
             catch (FlurlHttpException ex)
@@ -275,9 +275,9 @@ namespace IGMarkets
 
                 var sentiments = await request
                     .Endpoint("/clientsentiment?marketIds=" + markets)
-                    .GetJsonAsync<ClientSentiments>();
+                    .GetJsonAsync<ClientSentimentResults>();
 
-                return sentiments.Results;
+                return sentiments.ClientSentiments ?? new List<ClientSentiment>();
 
             }
             catch (FlurlHttpException ex)
@@ -312,7 +312,7 @@ namespace IGMarkets
             }
         }
 
-        public async Task<IList<Market>> GetWatchlist(string id)
+        public async Task<IList<WatchlistMarket>> GetWatchlist(string id)
         {
             Guard.Against.NullOrEmpty(id, nameof(id));
 
@@ -323,9 +323,9 @@ namespace IGMarkets
 
                 var markets = await request
                     .Endpoint("/watchlists/" + id)
-                    .GetJsonAsync<Markets>();
+                    .GetJsonAsync<WatchlistMarkets>();
 
-                return markets.Results ?? new List<Market>();
+                return markets.Markets ?? new List<WatchlistMarket>();
 
             }
             catch (FlurlHttpException ex)

@@ -40,16 +40,16 @@ Markets:
 
 Watchlists:
 
-- [ ] /watchlists
-- [ ] /watchlists/id
+- [x] /watchlists
+- [x] /watchlists/id
 
 Client Sentiment:
 
-- [ ] /clientsentiment
-- [ ] /clientsentiment/marketId
+- [x] /clientsentiment
+- [x] /clientsentiment/marketId
 - [ ] /clientsentiment/related/marketId
 
 Session:
 
-- [ ] /session
-- [ ] /session/refresh-token
+- [x] /session
+- [x] /session/refresh-token

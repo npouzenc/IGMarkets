@@ -467,7 +467,7 @@ namespace IGMarkets.Tests
             Assert.IsNotNull(markets);
             Assert.IsNotEmpty(markets);
             Assert.AreEqual(7, markets.Count);
-            var cac40 = markets.Where(market => market.Instrument.Epic == "IX.D.CAC.IDF.IP").First();
+            var cac40 = markets.Where(market => market.Epic == "IX.D.CAC.IDF.IP").First();
         }
 
         #endregion

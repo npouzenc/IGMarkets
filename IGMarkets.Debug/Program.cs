@@ -55,7 +55,7 @@ namespace IGMarkets.Debug
                 Console.WriteLine($"\t{watchlist.Id}: {watchlist.Name} contains the following markets:");
                 foreach (var market in markets)
                 {
-                    Console.WriteLine($"\t\tMarket: {market.Instrument.Name} ({market.Instrument.Epic})");
+                    Console.WriteLine($"\t\tMarket: {market.InstrumentName} ({market.Epic})");
                 }
             }
             
