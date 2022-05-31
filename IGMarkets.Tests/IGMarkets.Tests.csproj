@@ -16,6 +16,7 @@
     <None Remove="Json\prices_CC.D.LCO.UME.IP.json" />
     <None Remove="Json\prices_CC.D.LCO.UNC.IP.json" />
     <None Remove="Json\prices_CS.D.EURUSD.MINI.IP.json" />
+    <None Remove="Json\prices_CS.D.EURUSD.MINI.IP_3DailyDataPoints.json" />
     <None Remove="Json\watchlists.json" />
     <None Remove="Json\watchlist_5222222.json" />
     <None Remove="Json\watchlist_PopularMarkets.json" />
@@ -30,6 +31,7 @@
     <EmbeddedResource Include="Json\markets_CS.D.EURUSD.MINI.IP.json" />
     <EmbeddedResource Include="Json\prices_CC.D.LCO.UME.IP.json" />
     <EmbeddedResource Include="Json\prices_CC.D.LCO.UNC.IP.json" />
+    <EmbeddedResource Include="Json\prices_CS.D.EURUSD.MINI.IP_3DailyDataPoints.json" />
     <EmbeddedResource Include="Json\watchlist_5222222.json" />
     <EmbeddedResource Include="Json\watchlist_PopularMarkets.json" />
     <EmbeddedResource Include="Json\watchlists.json" />

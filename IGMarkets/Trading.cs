@@ -106,7 +106,7 @@ namespace IGMarkets
 
                 Session = await request
                     .Endpoint("/session/refresh-token")
-                    .PostJsonAsync(new { refresh_token = Session.OAuthToken.RefreshToken })
+                    .PostJsonAsync(new { refresh_token = Session.OAuthToken.Refresh_token })
                     .ReceiveJson<Session>();
 
                 IsConnected = true;
@@ -127,11 +127,11 @@ namespace IGMarkets
             {
                 var request = new IGRequest(_credentials, Session);
 
-                var searchResults = await request
+                var response = await request
                     .Endpoint("/markets?searchTerm=")
                     .SetQueryParam("searchTerm", searchTerm, true)
                     .GetJsonAsync<SearchMarketsResult>();
-                return searchResults.Results ?? new List<SearchMarketResult>();   
+                return response.Results ?? new List<SearchMarketResult>();   
             }
             catch (FlurlHttpException ex)
             {
@@ -212,14 +212,14 @@ namespace IGMarkets
             {
                 var request = new IGRequest(_credentials, Session);
 
-                var prices = await request
+                var response = await request
                     .Endpoint("/prices/" + epic, version: 3)
                     .SetQueryParam("resolution", timeframe)
                     .SetQueryParam("max", maxNumberOfPricePoints)
                     .SetQueryParam("pageSize", 0) // disabling paging
-                    .GetJsonAsync<Prices>(); // Care of MaxAllowance of 10,000 points of data per week...
+                    .GetJsonAsync<PricesResult>(); // Care of MaxAllowance of 10,000 points of data per week...
 
-                return prices.Results ?? new List<Price>();
+                return response.Prices ?? new List<Price>();
 
             }
             catch (FlurlHttpException ex)
@@ -240,15 +240,15 @@ namespace IGMarkets
             {
                 var request = new IGRequest(_credentials, Session);
 
-                var prices = await request
+                var response = await request
                     .Endpoint("/prices/" + epic, version: 3)
                     .SetQueryParam("resolution", timeframe)
                     .SetQueryParam("from", from.ToString("s"))
                     .SetQueryParam("to", to.ToString("s"))
                     .SetQueryParam("pageSize", 0) // disabling paging
-                    .GetJsonAsync<Prices>(); // Care of MaxAllowance of 10,000 points of data per week...
+                    .GetJsonAsync<PricesResult>(); // Care of MaxAllowance of 10,000 points of data per week...
 
-                return prices.Results ?? new List<Price>();
+                return response.Prices ?? new List<Price>();
 
             }
             catch (FlurlHttpException ex)
@@ -273,11 +273,11 @@ namespace IGMarkets
             {
                 var request = new IGRequest(_credentials, Session);
 
-                var sentiments = await request
+                var response = await request
                     .Endpoint("/clientsentiment?marketIds=" + markets)
                     .GetJsonAsync<ClientSentimentResults>();
 
-                return sentiments.ClientSentiments ?? new List<ClientSentiment>();
+                return response.ClientSentiments ?? new List<ClientSentiment>();
 
             }
             catch (FlurlHttpException ex)
@@ -298,11 +298,11 @@ namespace IGMarkets
             {
                 var request = new IGRequest(_credentials, Session);
 
-                var watchlists = await request
+                var response = await request
                     .Endpoint("/watchlists")
-                    .GetJsonAsync<Watchlists>();
+                    .GetJsonAsync<WatchlistsResult>();
 
-                return watchlists.Results ?? new List<Watchlist>();
+                return response.Watchlists ?? new List<Watchlist>();
 
             }
             catch (FlurlHttpException ex)
@@ -321,11 +321,11 @@ namespace IGMarkets
             {
                 var request = new IGRequest(_credentials, Session);
 
-                var markets = await request
+                var response = await request
                     .Endpoint("/watchlists/" + id)
                     .GetJsonAsync<WatchlistMarkets>();
 
-                return markets.Markets ?? new List<WatchlistMarket>();
+                return response.Markets ?? new List<WatchlistMarket>();
 
             }
             catch (FlurlHttpException ex)

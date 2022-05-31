@@ -58,7 +58,7 @@ namespace IGMarkets.API
             {
                 request
                     .WithHeader("IG-ACCOUNT-ID", Session.AccountId)
-                    .WithOAuthBearerToken(Session.OAuthToken.AccessToken);
+                    .WithOAuthBearerToken(Session.OAuthToken.Access_token);
             }
             
             return request;

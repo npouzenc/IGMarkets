@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IGMarkets.API
 {
-    [DebuggerDisplay("Time={SnapshotTime}, Close: {Close}")]
+    [DebuggerDisplay("Time={SnapshotTime}, Close: {ClosePrice}")]
     public class Price
     {
         public string SnapshotTime { get; set; }
@@ -17,16 +16,12 @@ namespace IGMarkets.API
 
         public int LastTradedVolume { get; set; }
 
-        [JsonProperty(PropertyName = "openPrice")]
-        public PriceData Open { get; set; }
+        public PriceData OpenPrice { get; set; }
 
-        [JsonProperty(PropertyName = "closePrice")]
-        public PriceData Close { get; set; }
+        public PriceData ClosePrice { get; set; }
 
-        [JsonProperty(PropertyName = "highPrice")]
-        public PriceData High { get; set; }
+        public PriceData HighPrice { get; set; }
 
-        [JsonProperty(PropertyName = "lowPrice")]
-        public PriceData Low { get; set; }
+        public PriceData LowPrice { get; set; }
     }
 }

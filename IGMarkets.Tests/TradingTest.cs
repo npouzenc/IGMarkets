@@ -54,11 +54,11 @@ namespace IGMarkets.Tests
             Assert.AreEqual(new System.Uri(loginJsonResponse.lightstreamerEndpoint), tradingSession.Session.LightstreamerEndpoint);
             Assert.AreEqual(loginJsonResponse.timezoneOffset, tradingSession.Session.TimezoneOffset);
             Assert.IsNotNull(tradingSession.Session.OAuthToken);
-            Assert.AreEqual(loginJsonResponse.oauthToken.access_token, tradingSession.Session.OAuthToken.AccessToken);
-            Assert.AreEqual(loginJsonResponse.oauthToken.refresh_token, tradingSession.Session.OAuthToken.RefreshToken);
-            Assert.AreEqual(loginJsonResponse.oauthToken.expires_in, tradingSession.Session.OAuthToken.ExpiresIn);
+            Assert.AreEqual(loginJsonResponse.oauthToken.access_token, tradingSession.Session.OAuthToken.Access_token);
+            Assert.AreEqual(loginJsonResponse.oauthToken.refresh_token, tradingSession.Session.OAuthToken.Refresh_token);
+            Assert.AreEqual(loginJsonResponse.oauthToken.expires_in, tradingSession.Session.OAuthToken.Expires_in);
             Assert.AreEqual(loginJsonResponse.oauthToken.scope, tradingSession.Session.OAuthToken.Scope);
-            Assert.AreEqual(loginJsonResponse.oauthToken.token_type, tradingSession.Session.OAuthToken.TokenType);
+            Assert.AreEqual(loginJsonResponse.oauthToken.token_type, tradingSession.Session.OAuthToken.Token_type);
             _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session")
                 .WithVerb(HttpMethod.Post)
                 .WithHeader("VERSION")
@@ -87,7 +87,7 @@ namespace IGMarkets.Tests
         {
             // Arrange
             var trading = Connect();
-            string refreshToken = trading.Session.OAuthToken.RefreshToken;
+            string refreshToken = trading.Session.OAuthToken.Refresh_token;
             ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session/refresh-token
 
             // Act
@@ -95,7 +95,7 @@ namespace IGMarkets.Tests
 
             // Assert
             Assert.IsTrue(trading.IsConnected);
-            Assert.AreNotEqual(refreshToken, trading.Session.OAuthToken.RefreshToken);
+            Assert.AreNotEqual(refreshToken, trading.Session.OAuthToken.Refresh_token);
             _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session/refresh-token")
                 .WithVerb(HttpMethod.Post)
                 .WithHeader("VERSION")
@@ -104,12 +104,6 @@ namespace IGMarkets.Tests
                 .WithRequestBody("*refresh_token*");
         }
 
-
-        public async Task Session_MaxAllowance()
-        {
-            // {"errorCode":"error.public-api.exceeded-api-key-allowance"}
-            Assert.Fail("403 error: Not implemented yet");
-        }
         #endregion
 
         #region Tests for /markets
@@ -263,8 +257,8 @@ namespace IGMarkets.Tests
             Assert.IsNotEmpty(prices);
             Assert.AreEqual(numberOfPricePoints, prices.Count);
             Assert.AreEqual(snapshotTime, prices[0].SnapshotTime);
-            Assert.AreEqual(firstOpenPriceBid, prices[0].Open.Bid);
-            Assert.AreEqual(firstOpenPriceAsk, prices[0].Open.Ask);
+            Assert.AreEqual(firstOpenPriceBid, prices[0].OpenPrice.Bid);
+            Assert.AreEqual(firstOpenPriceAsk, prices[0].OpenPrice.Ask);
         }
 
         [TestCase("CC.D.LCO.UME.IP", 22, "2021/09/01 00:00:00", "2021/09/30 00:00:00")]
@@ -295,6 +289,31 @@ namespace IGMarkets.Tests
             Assert.AreEqual(numberOfPricePoints, prices.Count);
             Assert.AreEqual(firstSnapshotTime, prices.First().SnapshotTime);
             Assert.AreEqual(lastSnapshotTime, prices.Last().SnapshotTime);
+        }
+
+        //[TestCase("CC.D.LCO.UME.IP", 22, "2021/09/01 00:00:00", "2021/09/30 00:00:00")]
+        public async Task Prices_GetPricesWithSpecificResolutionAndNumberOfDataPoints(string instrument, Timeframe resolution,
+            int numberOfPricePoints)
+        {
+            // Arrange
+            var trading = Connect();
+            var jsonFile = $"prices_{instrument}.json";
+            _httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var prices = await trading.GetPrices(instrument, resolution, numberOfPricePoints);
+
+            // Assert
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/prices/" + instrument)
+                .WithVerb(HttpMethod.Get)
+                .WithQueryParam("resolution", "MINUTE")
+                .WithQueryParam("max", numberOfPricePoints)
+                .WithQueryParam("pageSize", 0)
+                .WithHeader("VERSION", 3)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotEmpty(prices);
+            Assert.AreEqual(numberOfPricePoints, prices.Count);
         }
 
         #endregion

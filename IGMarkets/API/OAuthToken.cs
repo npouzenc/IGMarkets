@@ -1,9 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace IGMarkets.API
 {
@@ -18,22 +13,16 @@ namespace IGMarkets.API
         {
             TokenCreationDate = DateTime.Now;
         }
+        public string Access_token { get; set; }
 
-        [JsonProperty(PropertyName = "access_token")]
-        public string AccessToken { get; set; }
+        public int Expires_in { get; set; }
 
-        [JsonProperty(PropertyName = "expires_in")]
-        public int ExpiresIn { get; set; }
+        public string Refresh_token { get; set; }
 
-        [JsonProperty(PropertyName = "refresh_token")]
-        public string RefreshToken { get; set; }
-
-        [JsonProperty(PropertyName = "scope")]
         public string Scope { get; set; }
 
-        [JsonProperty(PropertyName = "token_type")]
-        public string TokenType { get; set; }
+        public string Token_type { get; set; }
 
-        public DateTime GetExpirationDate() => TokenCreationDate.AddSeconds(ExpiresIn);
+        public DateTime GetExpirationDate() => TokenCreationDate.AddSeconds(Expires_in);
     }
 }

@@ -1,0 +1,93 @@
+{
+  "prices": [
+    {
+      "snapshotTime": "2022/05/29 00:00:00",
+      "snapshotTimeUTC": "2022-05-28T22:00:00",
+      "openPrice": {
+        "bid": 1.07295,
+        "ask": 1.07405,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.07317,
+        "ask": 1.07347,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.07354,
+        "ask": 1.07435,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.07251,
+        "ask": 1.07315,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 2770
+    },
+    {
+      "snapshotTime": "2022/05/30 00:00:00",
+      "snapshotTimeUTC": "2022-05-29T22:00:00",
+      "openPrice": {
+        "bid": 1.07318,
+        "ask": 1.07348,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.07751,
+        "ask": 1.07811,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.07865,
+        "ask": 1.07875,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.07254,
+        "ask": 1.07268,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 118628
+    },
+    {
+      "snapshotTime": "2022/05/31 00:00:00",
+      "snapshotTimeUTC": "2022-05-30T22:00:00",
+      "openPrice": {
+        "bid": 1.07750,
+        "ask": 1.07810,
+        "lastTraded": null
+      },
+      "closePrice": {
+        "bid": 1.07344,
+        "ask": 1.07350,
+        "lastTraded": null
+      },
+      "highPrice": {
+        "bid": 1.07780,
+        "ask": 1.07823,
+        "lastTraded": null
+      },
+      "lowPrice": {
+        "bid": 1.06787,
+        "ask": 1.06794,
+        "lastTraded": null
+      },
+      "lastTradedVolume": 153470
+    }
+  ],
+  "instrumentType": "CURRENCIES",
+  "metadata": {
+    "allowance": {
+      "remainingAllowance": 9875,
+      "totalAllowance": 10000,
+      "allowanceExpiry": 599353
+    },
+    "size": 3,
+    "pageData": {
+      "pageSize": 3,
+      "pageNumber": 1,
+      "totalPages": 1
+    }
+  }
+}

@@ -1,13 +1,19 @@
 ﻿using IGMarkets;
 using Microsoft.Extensions.Configuration;
+using System;
 
-var conf = ConfigurationBuilder();
-var login = conf["IG:login"];
-var password = conf["IG:password"];
-var apiKey = conf["IG:apiKey"];
+var config = ConfigurationBuilder();
+var login = config["IG:login"];
+var password = config["IG:password"];
+var apiKey = config["IG:apiKey"];
      
 using Trading trading = IG.Connect(login, password, apiKey, isDemo: true);
 
+var prices = await trading.GetPrices("CS.D.EURUSD.MINI.IP", Timeframe.DAY, maxNumberOfPricePoints: 3);
+foreach (var price in prices)
+{
+    Console.WriteLine(price);
+}
 
 static IConfigurationRoot ConfigurationBuilder()
 {
