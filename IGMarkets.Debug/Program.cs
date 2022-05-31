@@ -10,6 +10,7 @@ var apiKey = configuration["IG:apiKey"];
      
 using Trading trading = IG.Connect(identifier, password, apiKey, isDemo: true);
 await GetBrentPrices(trading, new DateTime(2021, 09, 01), new DateTime(2021, 09, 30));
+await GetLastBrentDailyPrices(trading);
 await GetSentiments(trading);
 await GetWatchlists(trading);
    
