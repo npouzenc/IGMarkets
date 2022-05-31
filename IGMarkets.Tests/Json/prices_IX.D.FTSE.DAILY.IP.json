@@ -1,87 +1,87 @@
 {
   "prices": [
     {
-      "snapshotTime": "2022/05/29 00:00:00",
-      "snapshotTimeUTC": "2022-05-28T22:00:00",
+      "snapshotTime": "2022/05/27 00:00:00",
+      "snapshotTimeUTC": "2022-05-26T22:00:00",
       "openPrice": {
-        "bid": 1.07295,
-        "ask": 1.07405,
+        "bid": 7553.1,
+        "ask": 7557.1,
         "lastTraded": null
       },
       "closePrice": {
-        "bid": 1.07317,
-        "ask": 1.07347,
+        "bid": 7592.3,
+        "ask": 7596.3,
         "lastTraded": null
       },
       "highPrice": {
-        "bid": 1.07354,
-        "ask": 1.07435,
+        "bid": 7599.4,
+        "ask": 7601.4,
         "lastTraded": null
       },
       "lowPrice": {
-        "bid": 1.07251,
-        "ask": 1.07315,
+        "bid": 7538.6,
+        "ask": 7541.1,
         "lastTraded": null
       },
-      "lastTradedVolume": 2770
+      "lastTradedVolume": 80638
     },
     {
       "snapshotTime": "2022/05/30 00:00:00",
       "snapshotTimeUTC": "2022-05-29T22:00:00",
       "openPrice": {
-        "bid": 1.07318,
-        "ask": 1.07348,
+        "bid": 7567.5,
+        "ask": 7571.5,
         "lastTraded": null
       },
       "closePrice": {
-        "bid": 1.07751,
-        "ask": 1.07811,
+        "bid": 7605.9,
+        "ask": 7609.9,
         "lastTraded": null
       },
       "highPrice": {
-        "bid": 1.07865,
-        "ask": 1.07875,
+        "bid": 7625.9,
+        "ask": 7626.9,
         "lastTraded": null
       },
       "lowPrice": {
-        "bid": 1.07254,
-        "ask": 1.07268,
+        "bid": 7560.3,
+        "ask": 7564.3,
         "lastTraded": null
       },
-      "lastTradedVolume": 118628
+      "lastTradedVolume": 53996
     },
     {
       "snapshotTime": "2022/05/31 00:00:00",
       "snapshotTimeUTC": "2022-05-30T22:00:00",
       "openPrice": {
-        "bid": 1.07750,
-        "ask": 1.07810,
+        "bid": 7602.4,
+        "ask": 7606.4,
         "lastTraded": null
       },
       "closePrice": {
-        "bid": 1.07344,
-        "ask": 1.07350,
+        "bid": 7590.5,
+        "ask": 7592.5,
         "lastTraded": null
       },
       "highPrice": {
-        "bid": 1.07780,
-        "ask": 1.07823,
+        "bid": 7648.7,
+        "ask": 7649.7,
         "lastTraded": null
       },
       "lowPrice": {
-        "bid": 1.06787,
-        "ask": 1.06794,
+        "bid": 7570.3,
+        "ask": 7572.3,
         "lastTraded": null
       },
-      "lastTradedVolume": 153470
+      "lastTradedVolume": 115560
     }
   ],
-  "instrumentType": "CURRENCIES",
+  "instrumentType": "INDICES",
   "metadata": {
     "allowance": {
-      "remainingAllowance": 9875,
+      "remainingAllowance": 9869,
       "totalAllowance": 10000,
-      "allowanceExpiry": 599353
+      "allowanceExpiry": 598177
     },
     "size": 3,
     "pageData": {

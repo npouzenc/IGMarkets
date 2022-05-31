@@ -9,7 +9,7 @@ var apiKey = config["IG:apiKey"];
      
 using Trading trading = IG.Connect(login, password, apiKey, isDemo: true);
 
-var prices = await trading.GetPrices("CS.D.EURUSD.MINI.IP", Timeframe.DAY, maxNumberOfPricePoints: 3);
+var prices = await trading.GetPrices("IX.D.FTSE.DAILY.IP", Timeframe.DAY, maxNumberOfPricePoints: 3);
 foreach (var price in prices)
 {
     Console.WriteLine(price);

@@ -291,7 +291,7 @@ namespace IGMarkets.Tests
             Assert.AreEqual(lastSnapshotTime, prices.Last().SnapshotTime);
         }
 
-        //[TestCase("CC.D.LCO.UME.IP", 22, "2021/09/01 00:00:00", "2021/09/30 00:00:00")]
+        [TestCase("IX.D.FTSE.DAILY.IP", Timeframe.DAY, 3)]
         public async Task Prices_GetPricesWithSpecificResolutionAndNumberOfDataPoints(string instrument, Timeframe resolution,
             int numberOfPricePoints)
         {
@@ -304,9 +304,9 @@ namespace IGMarkets.Tests
             var prices = await trading.GetPrices(instrument, resolution, numberOfPricePoints);
 
             // Assert
-            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/prices/" + instrument)
+            _httpTest.ShouldHaveCalled($"https://demo-api.ig.com/gateway/deal/prices/{instrument}")
                 .WithVerb(HttpMethod.Get)
-                .WithQueryParam("resolution", "MINUTE")
+                .WithQueryParam("resolution", resolution)
                 .WithQueryParam("max", numberOfPricePoints)
                 .WithQueryParam("pageSize", 0)
                 .WithHeader("VERSION", 3)
