@@ -104,6 +104,12 @@ namespace IGMarkets.Tests
                 .WithRequestBody("*refresh_token*");
         }
 
+
+        public async Task Session_MaxAllowance()
+        {
+            // {"errorCode":"error.public-api.exceeded-api-key-allowance"}
+            Assert.Fail("403 error: Not implemented yet");
+        }
         #endregion
 
         #region Tests for /markets
@@ -439,6 +445,29 @@ namespace IGMarkets.Tests
             Assert.AreEqual(recents.Editable, false);
             Assert.AreEqual(recents.Name, " Récent"); // French with a space that hasn't been trimmed...
             Assert.AreEqual(recents.Id, "5222223");
+        }
+
+        [Test]
+        public async Task Watchlists_GetPopularMarkets()
+        {
+            // Arrange
+            var trading = Connect();
+            var jsonFile = $"watchlist_PopularMarkets.json";
+            httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var markets = await trading.GetWatchlist("Popular%20Markets");
+
+            // Assert
+            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/watchlists/Popular%20Markets")
+                .WithVerb(HttpMethod.Get)
+                .WithHeader("VERSION", 1)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotNull(markets);
+            Assert.IsNotEmpty(markets);
+            Assert.AreEqual(7, markets.Count);
+            var cac40 = markets.Where(market => market.Instrument.Epic == "IX.D.CAC.IDF.IP").First();
         }
 
         #endregion
