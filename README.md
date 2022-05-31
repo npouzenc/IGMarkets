@@ -32,11 +32,11 @@ Dealing:
 Markets:
 
 - [ ] /marketsnavigation
-- [ ] /markets
-- [ ] /markets/epic
+- [x] /markets
+- [x] /markets/epic
 - [ ] /markets?searchTerm=
-- [ ] /prices
-- [ ] /prices/epic
+- [x] /prices
+- [x] /prices/epic
 
 Watchlists:
 
