@@ -13,13 +13,13 @@ namespace IGMarkets.Tests
         [SetUp]
         public void Setup()
         {
-            httpTest = new HttpTest();
+            _httpTest = new HttpTest();
         }
 
         [TearDown]
         public void DisposeHttpTest()
         {
-            httpTest.Dispose();
+            _httpTest.Dispose();
         }
 
         #region Tests for /session
@@ -42,7 +42,7 @@ namespace IGMarkets.Tests
                     expires_in = 60
                 }
             };
-            httpTest.RespondWithJson(loginJsonResponse);
+            _httpTest.RespondWithJson(loginJsonResponse);
 
             // Act
             var tradingSession = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
@@ -59,7 +59,7 @@ namespace IGMarkets.Tests
             Assert.AreEqual(loginJsonResponse.oauthToken.expires_in, tradingSession.Session.OAuthToken.ExpiresIn);
             Assert.AreEqual(loginJsonResponse.oauthToken.scope, tradingSession.Session.OAuthToken.Scope);
             Assert.AreEqual(loginJsonResponse.oauthToken.token_type, tradingSession.Session.OAuthToken.TokenType);
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session")
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session")
                 .WithVerb(HttpMethod.Post)
                 .WithHeader("VERSION")
                 .WithHeader("X-IG-API-KEY");
@@ -76,7 +76,7 @@ namespace IGMarkets.Tests
 
             // Assert
             Assert.IsFalse(trading.IsConnected);
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session")
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session")
                 .WithVerb(HttpMethod.Delete)
                 .WithHeader("VERSION")
                 .WithHeader("X-IG-API-KEY");
@@ -96,7 +96,7 @@ namespace IGMarkets.Tests
             // Assert
             Assert.IsTrue(trading.IsConnected);
             Assert.AreNotEqual(refreshToken, trading.Session.OAuthToken.RefreshToken);
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session/refresh-token")
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session/refresh-token")
                 .WithVerb(HttpMethod.Post)
                 .WithHeader("VERSION")
                 .WithHeader("X-IG-API-KEY")
@@ -132,14 +132,14 @@ namespace IGMarkets.Tests
             // Arrange
             var trading = Connect();
             var jsonResponse = LoadResource("markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json");
-            httpTest.RespondWith(jsonResponse);
+            _httpTest.RespondWith(jsonResponse);
 
             // Act
             var marketsDetails = await trading.GetMarkets(snapshotOnly: false,
                 "CS.D.EURUSD.CFD.IP", "CS.D.EURUSD.MINI.IP");
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets?epics=CS.D.EURUSD.CFD.IP,CS.D.EURUSD.MINI.IP")
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets?epics=CS.D.EURUSD.CFD.IP,CS.D.EURUSD.MINI.IP")
                 .WithVerb(HttpMethod.Get)
                 .WithHeader("VERSION")
                 .WithHeader("X-IG-API-KEY")
@@ -177,13 +177,13 @@ namespace IGMarkets.Tests
             // Arrange
             var trading = Connect();
             var jsonResponse = LoadResource("markets_CS.D.EURUSD.CFD.IP (snapshot only).json");
-            httpTest.RespondWith(jsonResponse);
+            _httpTest.RespondWith(jsonResponse);
 
             // Act
             var marketsDetails = await trading.GetMarkets(snapshotOnly: true, "CS.D.EURUSD.CFD.IP");
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets?epics=CS.D.EURUSD.CFD.IP&filter=SNAPSHOT_ONLY")
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets?epics=CS.D.EURUSD.CFD.IP&filter=SNAPSHOT_ONLY")
                 .WithVerb(HttpMethod.Get)
                 .WithHeader("VERSION")
                 .WithHeader("X-IG-API-KEY")
@@ -210,13 +210,13 @@ namespace IGMarkets.Tests
             // Arrange
             var trading = Connect();
             var jsonFile = $"markets_{instrument}.json";
-            httpTest.RespondWith(LoadResource(jsonFile));
+            _httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
             var market = await trading.GetMarket(instrument);
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets/" + instrument)
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/markets/" + instrument)
                 .WithVerb(HttpMethod.Get)
                 .WithHeader("VERSION")
                 .WithHeader("X-IG-API-KEY")
@@ -246,13 +246,13 @@ namespace IGMarkets.Tests
             // Arrange
             var trading = Connect();
             var jsonFile = $"prices_{instrument}.json";
-            httpTest.RespondWith(LoadResource(jsonFile));
+            _httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
             var prices = await trading.GetPrices(instrument, Timeframe.MINUTE, numberOfPricePoints);
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/prices/" + instrument)
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/prices/" + instrument)
                 .WithVerb(HttpMethod.Get)
                 .WithQueryParam("resolution", "MINUTE")
                 .WithQueryParam("max", numberOfPricePoints)
@@ -274,7 +274,7 @@ namespace IGMarkets.Tests
             // Arrange
             var trading = Connect();
             var jsonFile = $"prices_{instrument}.json";
-            httpTest.RespondWith(LoadResource(jsonFile));
+            _httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
             var startDate = new DateTime(2021, 09, 01);
@@ -282,7 +282,7 @@ namespace IGMarkets.Tests
             var prices = await trading.GetPrices(instrument, Timeframe.DAY, startDate, endDate);
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/prices/" + instrument)
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/prices/" + instrument)
                 .WithVerb(HttpMethod.Get)
                 .WithQueryParam("resolution", "DAY")
                 .WithQueryParam("from", startDate.ToString("s"))
@@ -306,13 +306,13 @@ namespace IGMarkets.Tests
             // Arrange
             var trading = Connect();
             var jsonFile = $"clientsentiment_FR40.json";
-            httpTest.RespondWith(LoadResource(jsonFile));
+            _httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
             var sentiments = await trading.GetSentiments("FR40");
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/clientsentiment")
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/clientsentiment")
                 .WithVerb(HttpMethod.Get)
                 .WithQueryParam("marketIds", "FR40") 
                 .WithHeader("VERSION", 1)
@@ -333,13 +333,13 @@ namespace IGMarkets.Tests
             // Arrange
             var trading = Connect();
             var jsonFile = $"clientsentiment_DE30,EURUSD,FR40.json";
-            httpTest.RespondWith(LoadResource(jsonFile));
+            _httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
             var sentiments = await trading.GetSentiments("FR40", "DE30", "EURUSD");
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/clientsentiment")
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/clientsentiment")
                 .WithVerb(HttpMethod.Get)
                 .WithQueryParam("marketIds", "FR40,DE30,EURUSD") // not in alphabetic order
                 .WithHeader("VERSION", 1)
@@ -369,13 +369,13 @@ namespace IGMarkets.Tests
             // Arrange
             var trading = Connect();
             var jsonFile = $"clientsentiments_UNKNOWN.json";
-            httpTest.RespondWith(LoadResource(jsonFile));
+            _httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
             var sentiments = await trading.GetSentiments("XXXXXXXX");
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/clientsentiment")
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/clientsentiment")
                 .WithVerb(HttpMethod.Get)
                 .WithQueryParam("marketIds", "XXXXXXXX") // Should raise an error?
                 .WithHeader("VERSION", 1)
@@ -411,13 +411,13 @@ namespace IGMarkets.Tests
             // Arrange
             var trading = Connect();
             var jsonFile = $"watchlists.json";
-            httpTest.RespondWith(LoadResource(jsonFile));
+            _httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
             var watchlists = await trading.GetWatchlists();
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/watchlists")
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/watchlists")
                 .WithVerb(HttpMethod.Get)
                 .WithHeader("VERSION", 1)
                 .WithHeader("X-IG-API-KEY")
@@ -453,13 +453,13 @@ namespace IGMarkets.Tests
             // Arrange
             var trading = Connect();
             var jsonFile = $"watchlist_PopularMarkets.json";
-            httpTest.RespondWith(LoadResource(jsonFile));
+            _httpTest.RespondWith(LoadResource(jsonFile));
 
             // Act
             var markets = await trading.GetWatchlist("Popular%20Markets");
 
             // Assert
-            httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/watchlists/Popular%20Markets")
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/watchlists/Popular%20Markets")
                 .WithVerb(HttpMethod.Get)
                 .WithHeader("VERSION", 1)
                 .WithHeader("X-IG-API-KEY")

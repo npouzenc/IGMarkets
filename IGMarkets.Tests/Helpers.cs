@@ -9,7 +9,7 @@ namespace IGMarkets.Tests
 {
     public class Helpers
     {
-        protected HttpTest httpTest;
+        protected HttpTest _httpTest;
 
         /// <summary>
         /// Load string from embbeded resource
@@ -44,7 +44,7 @@ namespace IGMarkets.Tests
                     expires_in = 60
                 }
             };
-            httpTest.RespondWithJson(loginJsonResponse);
+            _httpTest.RespondWithJson(loginJsonResponse);
         }
 
         protected Trading Connect()
