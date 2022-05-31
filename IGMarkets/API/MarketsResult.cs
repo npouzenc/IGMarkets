@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace IGMarkets.API
 {
-    public class Markets
+    public class MarketsResult
     {
         public IList<Market> MarketDetails { get; set; }
     }

@@ -43,7 +43,7 @@ namespace IGMarkets
             });
         }
 
-        #region /session REST API endpoints
+        #region /session endpoints
 
         /// <summary>
         /// Asynchronous login to created a new trading session on IGMarkets with specified credentials.
@@ -118,6 +118,31 @@ namespace IGMarkets
         }
         #endregion
 
+        #region /marketnavigation endpoints
+
+        public async Task<IList<MarketNavigationNode>> GetMarketNavigation(string nodeId = "")
+        {
+            _logger.Info($"Requesting the market navigation hierarchy (market categories) available into the Trading API for node ID [{nodeId}].");
+            try
+            {
+                var request = new IGRequest(_credentials, Session);
+
+                var response = await request
+                    .Endpoint("/marketnavigation/" + nodeId)
+                    .GetJsonAsync<MarketNavigationResult>();
+
+                return response.Nodes ?? new List<MarketNavigationNode>();
+
+            }
+            catch (FlurlHttpException ex)
+            {
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
+            }
+        }
+
+        #endregion
+
         #region /markets endpoints
 
         public async Task<IList<SearchMarketResult>> SearchMarkets(string searchTerm)
@@ -163,7 +188,7 @@ namespace IGMarkets
                     .Endpoint("/markets", version: 2)
                     .SetQueryParam("epics", epicsQueryParam, true)
                     .SetQueryParam("filter", snapshotOnly ? "SNAPSHOT_ONLY":"ALL")
-                    .GetJsonAsync<Markets>();
+                    .GetJsonAsync<MarketsResult>();
 
                 return response.MarketDetails ?? new List<Market>();
                 

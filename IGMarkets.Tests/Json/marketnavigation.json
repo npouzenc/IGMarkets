@@ -1,0 +1,97 @@
+{
+  "nodes": [
+    {
+      "id": "668394",
+      "name": "Crypto-monnaie"
+    },
+    {
+      "id": "5371876",
+      "name": "Indices - Weekend"
+    },
+    {
+      "id": "97601",
+      "name": "Indices "
+    },
+    {
+      "id": "264176",
+      "name": "Indices (mini)"
+    },
+    {
+      "id": "195235",
+      "name": "Forex"
+    },
+    {
+      "id": "264139",
+      "name": "Forex (mini)"
+    },
+    {
+      "id": "169656",
+      "name": "Actions - Euronext (Paris)"
+    },
+    {
+      "id": "298158",
+      "name": "Actions - US (Toutes sessions)"
+    },
+    {
+      "id": "176472",
+      "name": "Actions - NASDAQ (US)"
+    },
+    {
+      "id": "177223",
+      "name": "Actions - NYSE (US)"
+    },
+    {
+      "id": "172904",
+      "name": "Actions - LSE (Royaume-Uni)"
+    },
+    {
+      "id": "170023",
+      "name": "Actions - Euronext (Amsterdam)"
+    },
+    {
+      "id": "171438",
+      "name": "Actions - XETRA (Allemagne)"
+    },
+    {
+      "id": "170471",
+      "name": "Actions - JSE (Johannesburg)"
+    },
+    {
+      "id": "170104",
+      "name": "Actions - ATHEX (Athènes)"
+    },
+    {
+      "id": "169329",
+      "name": "Actions - Euronext (Belgique)"
+    },
+    {
+      "id": "169591",
+      "name": "Actions - Euronext (Lisbonne)"
+    },
+    {
+      "id": "170630",
+      "name": "Actions - MIB (Milan)"
+    },
+    {
+      "id": "101515",
+      "name": "Matières premières-Métaux-Energies"
+    },
+    {
+      "id": "264151",
+      "name": "Matières premières - Métaux et Energies (mini)"
+    },
+    {
+      "id": "108092",
+      "name": "Obligations/Marchés de taux"
+    },
+    {
+      "id": "264251",
+      "name": "Taux et Obligations (mini)"
+    },
+    {
+      "id": "184730",
+      "name": "ETFs, ETCs & Trackers"
+    }
+  ],
+  "markets": null
+}

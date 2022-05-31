@@ -9,10 +9,17 @@ var apiKey = config["IG:apiKey"];
      
 using Trading trading = IG.Connect(login, password, apiKey, isDemo: true);
 
-var prices = await trading.GetPrices("IX.D.FTSE.DAILY.IP", Timeframe.DAY, maxNumberOfPricePoints: 3);
-foreach (var price in prices)
+var navigation = await trading.GetMarketNavigation();
+Console.WriteLine(navigation.Count);
+foreach (var node in navigation)
 {
-    Console.WriteLine(price);
+    Console.WriteLine($"{node.ID} ({node.Name}):");
+    var subNavigation = await trading.GetMarketNavigation(node.ID);
+    foreach (var subNode in subNavigation)
+    {
+        Console.WriteLine($"\t{subNode.ID} ({subNode.Name})");
+    }
+    System.Threading.Thread.Sleep(10000); // avoiding error.public-api.exceeded-api-key-allowance
 }
 
 static IConfigurationRoot ConfigurationBuilder()

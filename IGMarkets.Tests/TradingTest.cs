@@ -261,6 +261,30 @@ namespace IGMarkets.Tests
             Assert.AreEqual(firstOpenPriceAsk, prices[0].OpenPrice.Ask);
         }
 
+        [TestCase("marketnavigation.json")]
+        public async Task MarketNavigation_GetHierarchy(string jsonFile)
+        {
+            // Arrange
+            var trading = Connect();
+            _httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var marketNavigation = await trading.GetMarketNavigation();
+
+            // Assert
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/marketnavigation/")
+                .WithVerb(HttpMethod.Get)
+                .WithHeader("VERSION", 1)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotEmpty(marketNavigation);
+            Assert.AreEqual(marketNavigation.Count, 23);
+            var firstNode = marketNavigation[0];
+            Assert.AreEqual(firstNode.ID, "668394");
+            Assert.AreEqual(firstNode.Name, "Crypto-monnaie");
+        }
+
+
         [TestCase("CC.D.LCO.UME.IP", 22, "2021/09/01 00:00:00", "2021/09/30 00:00:00")]
         public async Task Prices_GetPricesBetweenTwoDates(string instrument, int numberOfPricePoints,
             string firstSnapshotTime, string lastSnapshotTime)

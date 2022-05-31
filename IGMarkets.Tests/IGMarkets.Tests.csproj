@@ -10,6 +10,7 @@
     <None Remove="Json\clientsentiments_unknown.json" />
     <None Remove="Json\clientsentiment_DE30,EURUSD,FR40.json" />
     <None Remove="Json\clientsentiment_FR40.json" />
+    <None Remove="Json\marketnavigation.json" />
     <None Remove="Json\markets_CS.D.EURUSD.CFD.IP (snapshot only).json" />
     <None Remove="Json\markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json" />
     <None Remove="Json\markets_CS.D.EURUSD.MINI.IP.json" />
@@ -29,6 +30,7 @@
     <EmbeddedResource Include="Json\markets_CS.D.EURUSD.CFD.IP %28snapshot only%29.json" />
     <EmbeddedResource Include="Json\markets_CS.D.EURUSD.CFD.IP+CS.D.EURUSD.MINI.IP.json" />
     <EmbeddedResource Include="Json\markets_CS.D.EURUSD.MINI.IP.json" />
+    <EmbeddedResource Include="Json\marketnavigation.json" />
     <EmbeddedResource Include="Json\prices_CC.D.LCO.UME.IP.json" />
     <EmbeddedResource Include="Json\prices_CC.D.LCO.UNC.IP.json" />
     <EmbeddedResource Include="Json\prices_IX.D.FTSE.DAILY.IP.json" />
