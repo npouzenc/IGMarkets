@@ -1,20 +1,26 @@
 ﻿using IGMarkets;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Threading.Tasks;
 
-var configuration = BuildConfiguration();
-var identifier = configuration["IG:login"];
-var password = configuration["IG:password"];
-var apiKey = configuration["IG:apiKey"];
+var conf = ConfigurationBuilder();
+var login = conf["IG:login"];
+var password = conf["IG:password"];
+var apiKey = conf["IG:apiKey"];
      
-using Trading trading = IG.Connect(identifier, password, apiKey, isDemo: true);
-await GetBrentPrices(trading, new DateTime(2021, 09, 01), new DateTime(2021, 09, 30));
-await GetLastBrentDailyPrices(trading);
-await GetSentiments(trading);
-await GetWatchlists(trading);
-   
-        
+using Trading trading = IG.Connect(login, password, apiKey, isDemo: true);
+
+
+static IConfigurationRoot ConfigurationBuilder()
+{
+    return new ConfigurationBuilder()
+        .SetBasePath(System.AppDomain.CurrentDomain.BaseDirectory)
+        .AddUserSecrets<Program>()
+        .Build();
+}
+
+/*    
+ *    Some examples:
+ *
+ 
 static async Task GetWatchlists(Trading trading)
 {
     var watchlists = await trading.GetWatchlists();
@@ -63,11 +69,4 @@ static async Task GetBrentPrices(Trading trading, DateTime from, DateTime to)
         Console.WriteLine($"\t{price.SnapshotTime}: O:[{price.Open}] C:[{price.Close}] H:[{price.High}] L:[{price.Low}]");
     }
 }
-
-static IConfigurationRoot BuildConfiguration()
-{
-    return new ConfigurationBuilder()
-        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-        .AddUserSecrets<Program>()
-        .Build();
-}
+*/
