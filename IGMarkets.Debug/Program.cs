@@ -1,15 +1,13 @@
-﻿using IGMarkets;
+﻿using System;
+using IGMarkets;
 using Microsoft.Extensions.Configuration;
-using System;
 
 var config = ConfigurationBuilder();
 var login = config["IG:login"];
 var password = config["IG:password"];
 var apiKey = config["IG:apiKey"];
 
-using Trading trading = IG.Connect(login, password, apiKey, isDemo: true);
-
-await Navigate(trading);
+using var trading = IG.Connect(login, password, apiKey, isDemo: true);
 
 static IConfigurationRoot ConfigurationBuilder()
 {

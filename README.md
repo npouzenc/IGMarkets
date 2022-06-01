@@ -4,6 +4,21 @@ Unofficial IG Markets Trading API for C# or dotnet based applications. IGMarkets
 
 Disclaimer: This library is **not associated** with IG Markets Limited or any of its affiliates or subsidiaries. If you use this library, it's at your own risk.
 
+## Usage
+
+```csharp
+using IGMarkets;
+
+using var trading = IG.Connect(login, password, apiKey);
+string epic = "CC.D.LCO.UNC.IP";
+var prices = await trading.GetPrices(epic, Timeframe.DAY);
+
+foreach (var price in prices)
+{
+    Console.WriteLine($"\t{price.SnapshotTime}: O:[{price.Open}] C:[{price.Close}] H:[{price.High}] L:[{price.Low}]");
+}
+```
+
 ## Endpoints progress
 
 Account:
