@@ -34,24 +34,6 @@ namespace IGMarkets
         public Session Session { get; private set; }
 
         /// <summary>
-        /// Creates a Polly Policy to retry once if facing an authorization issue (catched with a 401 http response). Refreshing the "access token" if this is the case.
-        /// </summary>
-        private AsyncRetryPolicy RetryPolicy
-        {
-            get
-            {
-                return Policy
-                    .Handle<FlurlHttpException>(exception => exception.StatusCode == 401) // Handling HTTP 401: error.security.oauth-token-invalid
-                    .RetryAsync(1, onRetry: async (exception, attemptNumber) => await RefreshSession());
-            }
-        }
-
-        /// <summary>
-        /// Creates a new HttpRequest to be used when calling the IG Markets REST API.
-        /// </summary>
-        private IFlurlRequest IG(string endpoint, int version = 1) => new IGRequest(_credentials, Session).Endpoint(endpoint, version);
-
-        /// <summary>
         /// Is the current session connected to IGMarkets ?
         /// </summary>
         public bool IsConnected { get; private set; }
@@ -84,8 +66,8 @@ namespace IGMarkets
         public async Task Login(Credentials credentials) 
         {
             Guard.Against.Null(credentials, nameof(credentials));
-            _logger.Debug($"Creating a dealing session with IG Markets for identifier '{credentials.Identifier}'");
-            this._credentials = credentials;
+
+            _credentials = credentials;
             try
             {
                 this.Session = await IG("/session", 3) // "OAuth" authentication mode
@@ -103,7 +85,6 @@ namespace IGMarkets
 
         public async Task Logout()
         {
-            _logger.Debug($"Closing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
             try
             {
                 await IG("/session").DeleteAsync();
@@ -143,8 +124,6 @@ namespace IGMarkets
 
         public async Task<IList<MarketNavigationNode>> GetMarketNavigation(string nodeId = "")
         {
-            _logger.Debug($"Requesting the market navigation hierarchy (market categories) for node ID [{nodeId}].");
-
             var response = await RetryPolicy.ExecuteAsync(
                 () => IG("/marketnavigation/" + nodeId).GetJsonAsync<MarketNavigationResult>()
             );
@@ -158,8 +137,6 @@ namespace IGMarkets
 
         public async Task<IList<SearchMarketResult>> SearchMarkets(string searchTerm)
         {
-            _logger.Debug($"Searching markets with the term '{searchTerm}'");
-
             var response = await RetryPolicy.ExecuteAsync(
                 () => IG("/markets?searchTerm=")
                     .SetQueryParam("searchTerm", searchTerm, true)
@@ -212,7 +189,6 @@ namespace IGMarkets
         {
             Guard.Against.NullOrEmpty(epic, nameof(epic));
 
-            _logger.Debug($"Requesting {epic} {maxNumberOfPricePoints} most recent prices (timeframe: {timeframe})");
             var response = await RetryPolicy.ExecuteAsync(
                 () => IG("/prices/" + epic, version: 3)
                     .SetQueryParam("resolution", timeframe)
@@ -254,8 +230,6 @@ namespace IGMarkets
 
             string markets = string.Join(",", marketIds);
 
-            _logger.Debug($"Requesting client sentiment for the following market: {markets}");
-
             var response = await RetryPolicy.ExecuteAsync(
                 () => IG("/clientsentiment?marketIds=" + markets).GetJsonAsync<ClientSentimentResults>()
             );
@@ -269,7 +243,6 @@ namespace IGMarkets
 
         public async Task<IList<Watchlist>> GetWatchlists()
         {
-            _logger.Debug($"Requesting watchlists for the account: {Session.AccountId}");
             var response = await RetryPolicy.ExecuteAsync(
                 () => IG("/watchlists").GetJsonAsync<WatchlistsResult>()
             );
@@ -281,11 +254,8 @@ namespace IGMarkets
         {
             Guard.Against.NullOrEmpty(id, nameof(id));
 
-            _logger.Debug($"Requesting watchlist id:{id}");
-
             var response = await RetryPolicy.ExecuteAsync(
-                () => IG("/watchlists/" + id)
-                    .GetJsonAsync<WatchlistMarkets>()
+                () => IG("/watchlists/" + id).GetJsonAsync<WatchlistMarkets>()
             );
             
             return response.Markets ?? new List<WatchlistMarket>();
@@ -306,10 +276,19 @@ namespace IGMarkets
 
         #region Private methods
 
-        private IGRequest CreateRequest()
-        {
-            return new IGRequest(_credentials, Session);
-        }
+
+        /// <summary>
+        /// Creates a Polly Policy to retry once if facing an authorization issue (catched with a 401 http response). Refreshing the "access token" if this is the case.
+        /// </summary>
+        private AsyncRetryPolicy RetryPolicy => Policy.Handle<FlurlHttpException>(exception => exception.StatusCode == 401) // Handling HTTP 401: error.security.oauth-token-invalid
+                                                      .RetryAsync(1, // retrying only once
+                                                        onRetry: async (exception, attemptNumber) => await RefreshSession()
+                                                       );
+
+        /// <summary>
+        /// Creates a new HttpRequest to be used when calling the IG Markets REST API.
+        /// </summary>
+        private IFlurlRequest IG(string endpoint, int version = 1) => new IGRequest(_credentials, Session).Endpoint(endpoint, version);
 
         private void LogRequest(FlurlCall call)
         {
@@ -330,8 +309,8 @@ namespace IGMarkets
         private string ReadSanitizedRequest(FlurlCall call)
         {
             string verb = call.Request.Verb.ToString();
-            string path = call.Request.Url.Path;
-            string body = path == "/gateway/deal/session" ? "*******" : call.RequestBody.JsonPrettify();
+            string path = call.Request.Url;
+            string body = call.Request.Url.Path == "/gateway/deal/session" ? "*******" : call.RequestBody.JsonPrettify();
             
             return $"--> {verb} {call.Request.Url}: {body}";
         }
@@ -339,18 +318,9 @@ namespace IGMarkets
         private async Task<string> ReadResponse(FlurlCall call)
         {
             var response = await call.Response.ResponseMessage.Content.ReadAsStringAsync();
-            return $"<-- {call}: {response}";
-        }
-
-        private bool IsWorthRetrying(FlurlHttpException ex)
-        {
-            switch (ex.Call.Response.StatusCode)
-            {
-                case 401:
-                    return true;
-                default:
-                    return false;
-            }
+            var status = call.Response.ResponseMessage.StatusCode;
+            double? duration = call.Completed ? call.Duration?.TotalMilliseconds : 0;
+            return $"<-- HTTP {status} [{call}] [duration:{duration}ms]: {response}";
         }
 
         #endregion
