@@ -156,7 +156,7 @@ namespace IGMarkets
         public async Task<IList<Market>> GetMarkets(bool snapshotOnly = false, params string[] epics)
         {
             Guard.Against.Null(epics, "epics", nameof(epics));
-            Guard.Against.OutOfRange(epics.Length, "epics", 1, 50);
+            Guard.Against.OutOfRange(epics.Length, "epics", 1, 50); // Max allowed epics asked in one request is 50
 
             string epicsQueryParam = string.Join(',', epics);
 
