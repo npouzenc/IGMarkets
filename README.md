@@ -31,7 +31,7 @@ Dealing:
 
 Markets:
 
-- [ ] /marketsnavigation
+- [x] /marketsnavigation
 - [x] /markets
 - [x] /markets/epic
 - [ ] /markets?searchTerm=
