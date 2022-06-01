@@ -88,7 +88,7 @@ namespace IGMarkets
             this._credentials = credentials;
             try
             {
-                this.Session = await IG("/session", 3)
+                this.Session = await IG("/session", 3) // "OAuth" authentication mode
                     .PostJsonAsync(new { identifier = credentials.Identifier, password = credentials.Password })
                     .ReceiveJson<Session>();
 
@@ -124,7 +124,7 @@ namespace IGMarkets
             try
             {
                 var refreshToken = Session.OAuthToken.Refresh_token;
-                Session.OAuthToken = null; // Deleting invalid access token to prevent an error from IG when requesting /session endpoint
+                Session.OAuthToken = null; // Deleting invalid access token to prevent an error from IG when requesting /session endpoint (because the actual access token could be sent to the REST API that doesn't like it)
 
                 Session.OAuthToken = await IG("/session/refresh-token")
                     .PostJsonAsync(new { refresh_token = refreshToken })
