@@ -8,9 +8,14 @@ using Flurl;
 using Flurl.Http;
 using IGMarkets.API;
 using NLog;
+using Polly;
+using Polly.Retry;
 
 namespace IGMarkets
 {
+    /// <summary>
+    /// Trading class encapsulating calls on IP Markets Trading API, cf. https://labs.ig.com/rest-trading-api-reference/
+    /// </summary>
     public class Trading : IDisposable
     {
         /// <summary>
@@ -103,11 +108,14 @@ namespace IGMarkets
             try
             {
                 var request = new IGRequest(_credentials, Session);
+                var refreshToken = Session.OAuthToken.Refresh_token;
+                // Deleting invalid OAuthToken to prevent an error from IG when requesting /session endpoint
+                Session.OAuthToken = null;
 
-                Session = await request
+                Session.OAuthToken = await request
                     .Endpoint("/session/refresh-token")
-                    .PostJsonAsync(new { refresh_token = Session.OAuthToken.Refresh_token })
-                    .ReceiveJson<Session>();
+                    .PostJsonAsync(new { refresh_token = refreshToken })
+                    .ReceiveJson<OAuthToken>();
 
                 IsConnected = true;
             }
@@ -123,13 +131,17 @@ namespace IGMarkets
         public async Task<IList<MarketNavigationNode>> GetMarketNavigation(string nodeId = "")
         {
             _logger.Info($"Requesting the market navigation hierarchy (market categories) available into the Trading API for node ID [{nodeId}].");
+
+            var policy = CreateTokenRefreshPolicy();
+
             try
             {
                 var request = new IGRequest(_credentials, Session);
 
-                var response = await request
-                    .Endpoint("/marketnavigation/" + nodeId)
-                    .GetJsonAsync<MarketNavigationResult>();
+                var response = await policy.ExecuteAsync(() =>
+                    request.Endpoint("/marketnavigation/" + nodeId)
+                    .GetJsonAsync<MarketNavigationResult>()
+                );
 
                 return response.Nodes ?? new List<MarketNavigationNode>();
 
@@ -137,6 +149,7 @@ namespace IGMarkets
             catch (FlurlHttpException ex)
             {
                 _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                // throwing exception to allow Polly to handle specific scenarios (refresh token that expires every minute, max allowance on specific requests...)
                 throw;
             }
         }
@@ -404,6 +417,31 @@ namespace IGMarkets
         {
             var response = await call.Response.ResponseMessage.Content.ReadAsStringAsync();
             return $"<-- {call}: {response}";
+        }
+
+
+        private AsyncRetryPolicy CreateTokenRefreshPolicy()
+        {
+            // Handling error.security.oauth-token-invalid
+            var retryPolicy = Policy
+               .Handle<FlurlHttpException>(IsWorthRetrying)
+               .RetryAsync(1, async (result, retryCount, context) =>
+               {
+                   await RefreshSession();
+               });
+
+            return retryPolicy;
+        }
+
+        private bool IsWorthRetrying(FlurlHttpException ex)
+        {
+            switch (ex.Call.Response.StatusCode)
+            {
+                case 401:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         #endregion

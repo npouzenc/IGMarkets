@@ -1,4 +1,5 @@
 ﻿using Flurl.Http.Testing;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,19 @@ namespace IGMarkets.Tests
     public class Helpers
     {
         protected HttpTest _httpTest;
+
+        [SetUp]
+        public void Setup()
+        {
+            _httpTest = new HttpTest();
+        }
+
+        [TearDown]
+        public void DisposeHttpTest()
+        {
+            _httpTest.Dispose();
+        }
+
 
         /// <summary>
         /// Load string from embbeded resource
@@ -27,7 +41,7 @@ namespace IGMarkets.Tests
             }
         }
 
-        protected void ArrangeHttpSessionResponse(bool demo)
+        protected void ArrangeHttpSessionResponse(bool demo, int expiresInSeconds = 60)
         {
             var loginJsonResponse = new
             {
@@ -41,7 +55,7 @@ namespace IGMarkets.Tests
                     refresh_token = Guid.NewGuid(),
                     scope = "profile",
                     token_type = "Bearer",
-                    expires_in = 60
+                    expires_in = expiresInSeconds
                 }
             };
             _httpTest.RespondWithJson(loginJsonResponse);

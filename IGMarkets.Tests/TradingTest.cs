@@ -10,18 +10,6 @@ namespace IGMarkets.Tests
     [TestFixture]
     public class TradingTest : Helpers
     {
-        [SetUp]
-        public void Setup()
-        {
-            _httpTest = new HttpTest();
-        }
-
-        [TearDown]
-        public void DisposeHttpTest()
-        {
-            _httpTest.Dispose();
-        }
-
         #region Tests for /session
         [Test]
         public void Session_Login()
@@ -87,6 +75,7 @@ namespace IGMarkets.Tests
         {
             // Arrange
             var trading = Connect();
+            string accessToken = trading.Session.OAuthToken.Access_token;
             string refreshToken = trading.Session.OAuthToken.Refresh_token;
             ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session/refresh-token
 
@@ -95,6 +84,7 @@ namespace IGMarkets.Tests
 
             // Assert
             Assert.IsTrue(trading.IsConnected);
+            Assert.AreNotEqual(accessToken, trading.Session.OAuthToken.Access_token); 
             Assert.AreNotEqual(refreshToken, trading.Session.OAuthToken.Refresh_token);
             _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session/refresh-token")
                 .WithVerb(HttpMethod.Post)

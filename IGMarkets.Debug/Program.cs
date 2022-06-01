@@ -6,21 +6,10 @@ var config = ConfigurationBuilder();
 var login = config["IG:login"];
 var password = config["IG:password"];
 var apiKey = config["IG:apiKey"];
-     
+
 using Trading trading = IG.Connect(login, password, apiKey, isDemo: true);
 
-var navigation = await trading.GetMarketNavigation();
-Console.WriteLine(navigation.Count);
-foreach (var node in navigation)
-{
-    Console.WriteLine($"{node.ID} ({node.Name}):");
-    var subNavigation = await trading.GetMarketNavigation(node.ID);
-    foreach (var subNode in subNavigation)
-    {
-        Console.WriteLine($"\t{subNode.ID} ({subNode.Name})");
-    }
-    System.Threading.Thread.Sleep(10000); // avoiding error.public-api.exceeded-api-key-allowance
-}
+await Navigate(trading);
 
 static IConfigurationRoot ConfigurationBuilder()
 {
@@ -28,6 +17,38 @@ static IConfigurationRoot ConfigurationBuilder()
         .SetBasePath(System.AppDomain.CurrentDomain.BaseDirectory)
         .AddUserSecrets<Program>()
         .Build();
+}
+
+static async System.Threading.Tasks.Task Navigate(Trading trading)
+{
+    var navigation = await trading.GetMarketNavigation();
+
+    Console.WriteLine(navigation);
+
+    foreach (var node in navigation)
+    {
+        Console.WriteLine($"{node.ID} ({node.Name}):");
+        var subNavigation = await trading.GetMarketNavigation(node.ID);
+        foreach (var subNode in subNavigation)
+        {
+            Console.WriteLine($"\t{subNode.ID} ({subNode.Name})");
+        }
+        System.Threading.Thread.Sleep(10000); // avoiding error.public-api.exceeded-api-key-allowance
+    }
+}
+
+static async System.Threading.Tasks.Task TestRefreshRoken(Trading trading)
+{
+    Console.WriteLine($"access_token: {trading.Session.OAuthToken.Access_token}");
+    Console.WriteLine($"expires at: {trading.Session.OAuthToken.GetExpirationDate().ToShortTimeString()}");
+    Console.WriteLine($"refresh_token: {trading.Session.OAuthToken.Refresh_token}");
+
+    Console.WriteLine();
+
+    await trading.RefreshSession();
+    Console.WriteLine($"access_token: {trading.Session.OAuthToken.Access_token}");
+    Console.WriteLine($"expires at: {trading.Session.OAuthToken.GetExpirationDate().ToLongTimeString()}");
+    Console.WriteLine($"refresh_token: {trading.Session.OAuthToken.Refresh_token}");
 }
 
 /*    
