@@ -124,8 +124,7 @@ namespace IGMarkets
             try
             {
                 var refreshToken = Session.OAuthToken.Refresh_token;
-                // Deleting invalid OAuthToken to prevent an error from IG when requesting /session endpoint
-                Session.OAuthToken = null;
+                Session.OAuthToken = null; // Deleting invalid access token to prevent an error from IG when requesting /session endpoint
 
                 Session.OAuthToken = await IG("/session/refresh-token")
                     .PostJsonAsync(new { refresh_token = refreshToken })
