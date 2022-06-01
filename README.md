@@ -10,12 +10,13 @@ Disclaimer: This library is **not associated** with IG Markets Limited or any of
 using IGMarkets;
 
 using var trading = IG.Connect(login, password, apiKey);
-string epic = "CC.D.LCO.UNC.IP";
+
+string epic = "CC.D.LCO.UNC.IP"; // Brent
 var prices = await trading.GetPrices(epic, Timeframe.DAY);
 
 foreach (var price in prices)
 {
-    Console.WriteLine($"\t{price.SnapshotTime}: O:[{price.Open}] C:[{price.Close}] H:[{price.High}] L:[{price.Low}]");
+    Console.WriteLine($"\t{price.SnapshotTime}: O:[{price.OpenPrice}] C:[{price.ClosePrice}] H:[{price.HighPrice}] L:[{price.LowPrice}]");
 }
 ```
 

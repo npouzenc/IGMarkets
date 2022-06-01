@@ -9,6 +9,14 @@ var apiKey = config["IG:apiKey"];
 
 using var trading = IG.Connect(login, password, apiKey, isDemo: true);
 
+string epic = "CC.D.LCO.UNC.IP";
+var prices = await trading.GetPrices(epic, Timeframe.DAY);
+
+foreach (var price in prices)
+{
+    Console.WriteLine($"\t{price.SnapshotTime}: O:[{price.OpenPrice}] C:[{price.ClosePrice}] H:[{price.HighPrice}] L:[{price.LowPrice}]");
+}
+
 static IConfigurationRoot ConfigurationBuilder()
 {
     return new ConfigurationBuilder()
