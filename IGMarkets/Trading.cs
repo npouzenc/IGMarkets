@@ -115,7 +115,8 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Fatal(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
             }
         }
         #endregion
