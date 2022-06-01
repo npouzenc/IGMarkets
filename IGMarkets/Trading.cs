@@ -101,7 +101,6 @@ namespace IGMarkets
 
         public async Task RefreshSession()
         {
-            _logger.Debug($"Refreshing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
             try
             {
                 var refreshToken = Session.OAuthToken.Refresh_token;
@@ -111,7 +110,13 @@ namespace IGMarkets
                     .PostJsonAsync(new { refresh_token = refreshToken })
                     .ReceiveJson<OAuthToken>();
 
+                var newToken = Session.OAuthToken;
+                if (newToken == null || string.IsNullOrEmpty(newToken.Access_token) || string.IsNullOrEmpty(newToken.Refresh_token))
+                {
+                    throw new ApplicationException($"No valid access token when refreshing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
+                }
                 IsConnected = true;
+
             }
             catch (FlurlHttpException ex)
             {

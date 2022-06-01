@@ -117,6 +117,24 @@ namespace IGMarkets.Tests
                 .WithRequestBody("*refresh_token*");
         }
 
+
+        [Test]
+        public void Session_RaisingFatalExceptionIfCannotRefreshToken()
+        {
+            // Arrange
+            var trading = Connect();
+            _httpTest.RespondWithJson(new { }); // empty response
+
+            // Act
+            // Assert
+            Assert.ThrowsAsync<ApplicationException>(async () => await trading.RefreshSession());
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session/refresh-token")
+                .WithVerb(HttpMethod.Post)
+                .WithHeader("VERSION")
+                .WithHeader("X-IG-API-KEY")
+                .WithRequestBody("*refresh_token*");
+        }
+
         #endregion
 
         #region Tests for /markets
