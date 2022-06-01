@@ -83,14 +83,37 @@ namespace IGMarkets.Tests
             await trading.RefreshSession();
 
             // Assert
-            Assert.IsTrue(trading.IsConnected);
+           
             Assert.AreNotEqual(accessToken, trading.Session.OAuthToken.Access_token); 
             Assert.AreNotEqual(refreshToken, trading.Session.OAuthToken.Refresh_token);
             _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session/refresh-token")
                 .WithVerb(HttpMethod.Post)
                 .WithHeader("VERSION")
                 .WithHeader("X-IG-API-KEY")
-                .WithOAuthBearerToken()
+                .WithRequestBody("*refresh_token*");
+        }
+
+        public async Task Session_RefreshingTokenIfObsolete()
+        {
+            // Arrange
+            ArrangeHttpSessionResponse(demo: true, expiresInSeconds: 0); // getting a valid OAuth token that immediatly expires
+            var trading = IG.Connect("Nicolas", "p@ssw0rd", "zzzzzzzzzzzzzzzzzzzzz", isDemo: true);
+            _httpTest.RespondWithJson(new { errorCode = "error.security.oauth-token-invalid" }, 401); // simulating a invalid token response from IG for the first call
+            ArrangeHttpSessionResponse(demo: true, expiresInSeconds: 60); // a retry SHOULD occur with a valid result
+
+            // Act
+            // Call SHOULD NOT failed with status code 401 (Unauthorized): GET https://demo-api.ig.com/gateway/deal/marketnavigation/
+            await trading.GetMarketNavigation();
+
+            // Assert
+            Assert.IsTrue(trading.IsConnected);
+            Assert.IsNotNull(trading.Session);
+            Assert.IsNotNull(trading.Session.OAuthToken);
+            Assert.AreEqual(60, trading.Session.OAuthToken.Expires_in);
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/session/refresh-token")
+                .WithVerb(HttpMethod.Post)
+                .WithHeader("VERSION")
+                .WithHeader("X-IG-API-KEY")
                 .WithRequestBody("*refresh_token*");
         }
 

@@ -34,6 +34,24 @@ namespace IGMarkets
         public Session Session { get; private set; }
 
         /// <summary>
+        /// Creates a Polly Policy to retry once if facing an authorization issue (catched with a 401 http response). Refreshing the "access token" if this is the case.
+        /// </summary>
+        private AsyncRetryPolicy RetryPolicy
+        {
+            get
+            {
+                return Policy
+                    .Handle<FlurlHttpException>(exception => exception.StatusCode == 401) // Handling HTTP 401: error.security.oauth-token-invalid
+                    .RetryAsync(1, onRetry: async (exception, attemptNumber) => await RefreshSession());
+            }
+        }
+
+        /// <summary>
+        /// Creates a new HttpRequest to be used when calling the IG Markets REST API.
+        /// </summary>
+        private IFlurlRequest IG(string endpoint, int version = 1) => new IGRequest(_credentials, Session).Endpoint(endpoint, version);
+
+        /// <summary>
         /// Is the current session connected to IGMarkets ?
         /// </summary>
         public bool IsConnected { get; private set; }
@@ -70,9 +88,7 @@ namespace IGMarkets
             this._credentials = credentials;
             try
             {
-                var request = new IGRequest(credentials, Session);
-                this.Session = await request
-                    .Endpoint("/session", 3)
+                this.Session = await IG("/session", 3)
                     .PostJsonAsync(new { identifier = credentials.Identifier, password = credentials.Password })
                     .ReceiveJson<Session>();
 
@@ -80,7 +96,8 @@ namespace IGMarkets
             }
             catch (FlurlHttpException ex)
             {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                _logger.Fatal(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw; // If we cannot login ...
             }
         }
 
@@ -89,16 +106,15 @@ namespace IGMarkets
             _logger.Info($"Closing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
             try
             {
-                var request = new IGRequest(_credentials, Session);
-                await request
-                    .Endpoint("/session")
-                    .DeleteAsync();
-
-                IsConnected = false;
+                await IG("/session").DeleteAsync();
             }
             catch (FlurlHttpException ex)
             {
                 _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+            }
+            finally
+            {
+                IsConnected = false;
             }
         }
 
@@ -107,13 +123,11 @@ namespace IGMarkets
             _logger.Info($"Refreshing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
             try
             {
-                var request = new IGRequest(_credentials, Session);
                 var refreshToken = Session.OAuthToken.Refresh_token;
                 // Deleting invalid OAuthToken to prevent an error from IG when requesting /session endpoint
                 Session.OAuthToken = null;
 
-                Session.OAuthToken = await request
-                    .Endpoint("/session/refresh-token")
+                Session.OAuthToken = await IG("/session/refresh-token")
                     .PostJsonAsync(new { refresh_token = refreshToken })
                     .ReceiveJson<OAuthToken>();
 
@@ -130,28 +144,13 @@ namespace IGMarkets
 
         public async Task<IList<MarketNavigationNode>> GetMarketNavigation(string nodeId = "")
         {
-            _logger.Info($"Requesting the market navigation hierarchy (market categories) available into the Trading API for node ID [{nodeId}].");
+            _logger.Debug($"Requesting the market navigation hierarchy (market categories) for node ID [{nodeId}].");
 
-            var policy = CreateTokenRefreshPolicy();
+            var response = await RetryPolicy.ExecuteAsync(
+                () => IG("/marketnavigation/" + nodeId).GetJsonAsync<MarketNavigationResult>()
+            );
 
-            try
-            {
-                var request = new IGRequest(_credentials, Session);
-
-                var response = await policy.ExecuteAsync(() =>
-                    request.Endpoint("/marketnavigation/" + nodeId)
-                    .GetJsonAsync<MarketNavigationResult>()
-                );
-
-                return response.Nodes ?? new List<MarketNavigationNode>();
-
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                // throwing exception to allow Polly to handle specific scenarios (refresh token that expires every minute, max allowance on specific requests...)
-                throw;
-            }
+            return response.Nodes ?? new List<MarketNavigationNode>();
         }
 
         #endregion
@@ -160,23 +159,15 @@ namespace IGMarkets
 
         public async Task<IList<SearchMarketResult>> SearchMarkets(string searchTerm)
         {
-            _logger.Info($"Searching markets with the term '{searchTerm}'");
-            try
-            {
-                var request = new IGRequest(_credentials, Session);
+            _logger.Debug($"Searching markets with the term '{searchTerm}'");
 
-                var response = await request
-                    .Endpoint("/markets?searchTerm=")
+            var response = await RetryPolicy.ExecuteAsync(
+                () => IG("/markets?searchTerm=")
                     .SetQueryParam("searchTerm", searchTerm, true)
-                    .GetJsonAsync<SearchMarketsResult>();
-                return response.Results ?? new List<SearchMarketResult>();   
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                throw;
-            }
-
+                    .GetJsonAsync<SearchMarketsResult>()
+            );
+            
+            return response.Results ?? new List<SearchMarketResult>();   
         }
 
         /// <summary>
@@ -192,49 +183,26 @@ namespace IGMarkets
 
             string epicsQueryParam = string.Join(',', epics);
 
-            _logger.Info($"Looking for the following markets: {epics}");
-            try
-            {
-                var request = new IGRequest(_credentials, Session);
-
-                var response = await request
-                    .Endpoint("/markets", version: 2)
+            _logger.Debug($"Looking for the following markets: {epics}");
+            var response = await RetryPolicy.ExecuteAsync(
+                () => IG("/markets", version: 2)
                     .SetQueryParam("epics", epicsQueryParam, true)
-                    .SetQueryParam("filter", snapshotOnly ? "SNAPSHOT_ONLY":"ALL")
-                    .GetJsonAsync<MarketsResult>();
+                    .SetQueryParam("filter", snapshotOnly ? "SNAPSHOT_ONLY" : "ALL")
+                    .GetJsonAsync<MarketsResult>()
+            );
 
-                return response.MarketDetails ?? new List<Market>();
-                
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                throw;
-            }
-
+            return response.MarketDetails ?? new List<Market>();
         }
 
         public async Task<Market> GetMarket(string epic)
         {
             Guard.Against.NullOrEmpty(epic, nameof(epic));
 
-            _logger.Info($"Looking for the following market: {epic}");
-            try
-            {
-                var request = new IGRequest(_credentials, Session);
+            _logger.Debug($"Looking for the following market: {epic}");
 
-                var market = await request
-                    .Endpoint("/markets/" + epic, version: 3)
-                    .GetJsonAsync<Market>();
-
-                return market;
-
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                throw;
-            }
+            return await RetryPolicy.ExecuteAsync(
+                () => IG("/markets/" + epic, version: 3).GetJsonAsync<Market>()
+            );
         }
 
         #endregion
@@ -245,26 +213,16 @@ namespace IGMarkets
         {
             Guard.Against.NullOrEmpty(epic, nameof(epic));
 
-            _logger.Info($"Requesting {epic} {maxNumberOfPricePoints} most recent prices (timeframe: {timeframe})");
-            try
-            {
-                var request = new IGRequest(_credentials, Session);
-
-                var response = await request
-                    .Endpoint("/prices/" + epic, version: 3)
+            _logger.Debug($"Requesting {epic} {maxNumberOfPricePoints} most recent prices (timeframe: {timeframe})");
+            var response = await RetryPolicy.ExecuteAsync(
+                () => IG("/prices/" + epic, version: 3)
                     .SetQueryParam("resolution", timeframe)
                     .SetQueryParam("max", maxNumberOfPricePoints)
                     .SetQueryParam("pageSize", 0) // disabling paging
-                    .GetJsonAsync<PricesResult>(); // Care of MaxAllowance of 10,000 points of data per week...
-
-                return response.Prices ?? new List<Price>();
-
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                throw;
-            }
+                    .GetJsonAsync<PricesResult>() // Care of MaxAllowance of 10,000 points of data per week...
+            );
+            
+            return response.Prices ?? new List<Price>();
         }
 
         public async Task<IList<Price>> GetPrices(string epic, Timeframe timeframe, DateTime from, DateTime to)
@@ -273,27 +231,18 @@ namespace IGMarkets
             Guard.Against.Default<DateTime>(from, nameof(from));
             Guard.Against.Default<DateTime>(to, nameof(to));
 
-            _logger.Info($"Requesting {epic} prices  between {from.ToUniversalTime()} and {to.ToUniversalTime()} (timeframe: {timeframe})");
-            try
-            {
-                var request = new IGRequest(_credentials, Session);
+            _logger.Debug($"Requesting {epic} prices  between {from.ToUniversalTime()} and {to.ToUniversalTime()} (timeframe: {timeframe})");
 
-                var response = await request
-                    .Endpoint("/prices/" + epic, version: 3)
+            var response = await RetryPolicy.ExecuteAsync(
+                () => IG("/prices/" + epic, version: 3)
                     .SetQueryParam("resolution", timeframe)
                     .SetQueryParam("from", from.ToString("s"))
                     .SetQueryParam("to", to.ToString("s"))
                     .SetQueryParam("pageSize", 0) // disabling paging
-                    .GetJsonAsync<PricesResult>(); // Care of MaxAllowance of 10,000 points of data per week...
+                    .GetJsonAsync<PricesResult>() // Care of MaxAllowance of 10,000 points of data per week...
+            );
 
-                return response.Prices ?? new List<Price>();
-
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                throw;
-            }
+            return response.Prices ?? new List<Price>();
         }
 
         #endregion
@@ -306,23 +255,13 @@ namespace IGMarkets
 
             string markets = string.Join(",", marketIds);
 
-            _logger.Info($"Requesting client sentiment for the following market: {markets}");
-            try
-            {
-                var request = new IGRequest(_credentials, Session);
+            _logger.Debug($"Requesting client sentiment for the following market: {markets}");
 
-                var response = await request
-                    .Endpoint("/clientsentiment?marketIds=" + markets)
-                    .GetJsonAsync<ClientSentimentResults>();
+            var response = await RetryPolicy.ExecuteAsync(
+                () => IG("/clientsentiment?marketIds=" + markets).GetJsonAsync<ClientSentimentResults>()
+            );
 
-                return response.ClientSentiments ?? new List<ClientSentiment>();
-
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                throw;
-            }
+            return response.ClientSentiments ?? new List<ClientSentiment>();
         }
 
         #endregion
@@ -331,46 +270,26 @@ namespace IGMarkets
 
         public async Task<IList<Watchlist>> GetWatchlists()
         {
-            _logger.Info($"Requesting watchlists for the account: {Session.AccountId}");
-            try
-            {
-                var request = new IGRequest(_credentials, Session);
+            _logger.Debug($"Requesting watchlists for the account: {Session.AccountId}");
+            var response = await RetryPolicy.ExecuteAsync(
+                () => IG("/watchlists").GetJsonAsync<WatchlistsResult>()
+            );
 
-                var response = await request
-                    .Endpoint("/watchlists")
-                    .GetJsonAsync<WatchlistsResult>();
-
-                return response.Watchlists ?? new List<Watchlist>();
-
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                throw;
-            }
+            return response.Watchlists ?? new List<Watchlist>();
         }
 
         public async Task<IList<WatchlistMarket>> GetWatchlist(string id)
         {
             Guard.Against.NullOrEmpty(id, nameof(id));
 
-            _logger.Info($"Requesting watchlist id:{id}");
-            try
-            {
-                var request = new IGRequest(_credentials, Session);
+            _logger.Debug($"Requesting watchlist id:{id}");
 
-                var response = await request
-                    .Endpoint("/watchlists/" + id)
-                    .GetJsonAsync<WatchlistMarkets>();
-
-                return response.Markets ?? new List<WatchlistMarket>();
-
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                throw;
-            }
+            var response = await RetryPolicy.ExecuteAsync(
+                () => IG("/watchlists/" + id)
+                    .GetJsonAsync<WatchlistMarkets>()
+            );
+            
+            return response.Markets ?? new List<WatchlistMarket>();
         }
 
         #endregion
@@ -387,6 +306,11 @@ namespace IGMarkets
         #endregion
 
         #region Private methods
+
+        private IGRequest CreateRequest()
+        {
+            return new IGRequest(_credentials, Session);
+        }
 
         private void LogRequest(FlurlCall call)
         {
@@ -417,20 +341,6 @@ namespace IGMarkets
         {
             var response = await call.Response.ResponseMessage.Content.ReadAsStringAsync();
             return $"<-- {call}: {response}";
-        }
-
-
-        private AsyncRetryPolicy CreateTokenRefreshPolicy()
-        {
-            // Handling error.security.oauth-token-invalid
-            var retryPolicy = Policy
-               .Handle<FlurlHttpException>(IsWorthRetrying)
-               .RetryAsync(1, async (result, retryCount, context) =>
-               {
-                   await RefreshSession();
-               });
-
-            return retryPolicy;
         }
 
         private bool IsWorthRetrying(FlurlHttpException ex)

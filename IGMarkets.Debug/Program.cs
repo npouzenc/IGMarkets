@@ -37,6 +37,10 @@ static async System.Threading.Tasks.Task Navigate(Trading trading)
     }
 }
 
+/*    
+ *    Some examples:
+ *
+
 static async System.Threading.Tasks.Task TestRefreshRoken(Trading trading)
 {
     Console.WriteLine($"access_token: {trading.Session.OAuthToken.Access_token}");
@@ -50,10 +54,6 @@ static async System.Threading.Tasks.Task TestRefreshRoken(Trading trading)
     Console.WriteLine($"expires at: {trading.Session.OAuthToken.GetExpirationDate().ToLongTimeString()}");
     Console.WriteLine($"refresh_token: {trading.Session.OAuthToken.Refresh_token}");
 }
-
-/*    
- *    Some examples:
- *
  
 static async Task GetWatchlists(Trading trading)
 {
