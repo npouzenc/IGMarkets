@@ -84,7 +84,7 @@ namespace IGMarkets
         public async Task Login(Credentials credentials) 
         {
             Guard.Against.Null(credentials, nameof(credentials));
-            _logger.Info($"Creating a dealing session with IG Markets for identifier '{credentials.Identifier}'");
+            _logger.Debug($"Creating a dealing session with IG Markets for identifier '{credentials.Identifier}'");
             this._credentials = credentials;
             try
             {
@@ -103,7 +103,7 @@ namespace IGMarkets
 
         public async Task Logout()
         {
-            _logger.Info($"Closing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
+            _logger.Debug($"Closing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
             try
             {
                 await IG("/session").DeleteAsync();
@@ -120,7 +120,7 @@ namespace IGMarkets
 
         public async Task RefreshSession()
         {
-            _logger.Info($"Refreshing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
+            _logger.Debug($"Refreshing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
             try
             {
                 var refreshToken = Session.OAuthToken.Refresh_token;
