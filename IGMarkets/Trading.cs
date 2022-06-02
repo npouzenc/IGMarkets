@@ -43,7 +43,7 @@ namespace IGMarkets
             Session = new Session();
             FlurlHttp.Configure(settings =>
             {
-                settings.BeforeCallAsync = LogRequest;
+                settings.BeforeCall = LogRequest;
                 settings.AfterCallAsync = LogResponse;
             });
         }
@@ -70,7 +70,7 @@ namespace IGMarkets
             _credentials = credentials;
             try
             {
-                this.Session = await IG("/session", 3) // "OAuth" authentication mode
+                this.Session = await RestAPI("/session", 3) // "OAuth" authentication mode
                     .PostJsonAsync(new { identifier = credentials.Identifier, password = credentials.Password })
                     .ReceiveJson<Session>();
 
@@ -87,7 +87,7 @@ namespace IGMarkets
         {
             try
             {
-                await IG("/session").DeleteAsync();
+                await RestAPI("/session").DeleteAsync();
             }
             catch (FlurlHttpException ex)
             {
@@ -106,7 +106,7 @@ namespace IGMarkets
                 var refreshToken = Session.OAuthToken.Refresh_token;
                 Session.OAuthToken = null; // Deleting invalid access token to prevent an error from IG when requesting /session endpoint (because the actual access token could be sent to the REST API that doesn't like it)
 
-                Session.OAuthToken = await IG("/session/refresh-token")
+                Session.OAuthToken = await RestAPI("/session/refresh-token")
                     .PostJsonAsync(new { refresh_token = refreshToken })
                     .ReceiveJson<OAuthToken>();
 
@@ -131,7 +131,7 @@ namespace IGMarkets
         public async Task<IList<MarketNavigationNode>> GetMarketNavigation(string nodeId = "")
         {
             var response = await RetryPolicy.ExecuteAsync(
-                () => IG("/marketnavigation/" + nodeId).GetJsonAsync<MarketNavigationResult>()
+                () => RestAPI("/marketnavigation/" + nodeId).GetJsonAsync<MarketNavigationResult>()
             );
 
             return response.Nodes ?? new List<MarketNavigationNode>();
@@ -144,7 +144,7 @@ namespace IGMarkets
         public async Task<IList<SearchMarketResult>> SearchMarkets(string searchTerm)
         {
             var response = await RetryPolicy.ExecuteAsync(
-                () => IG("/markets?searchTerm=")
+                () => RestAPI("/markets?searchTerm=")
                     .SetQueryParam("searchTerm", searchTerm, true)
                     .GetJsonAsync<SearchMarketsResult>()
             );
@@ -167,7 +167,7 @@ namespace IGMarkets
 
             _logger.Debug($"Looking for the following markets: {epics}");
             var response = await RetryPolicy.ExecuteAsync(
-                () => IG("/markets", version: 2)
+                () => RestAPI("/markets", version: 2)
                     .SetQueryParam("epics", epicsQueryParam, true)
                     .SetQueryParam("filter", snapshotOnly ? "SNAPSHOT_ONLY" : "ALL")
                     .GetJsonAsync<MarketsResult>()
@@ -183,7 +183,7 @@ namespace IGMarkets
             _logger.Debug($"Looking for the following market: {epic}");
 
             return await RetryPolicy.ExecuteAsync(
-                () => IG("/markets/" + epic, version: 3).GetJsonAsync<Market>()
+                () => RestAPI("/markets/" + epic, version: 3).GetJsonAsync<Market>()
             );
         }
 
@@ -196,7 +196,7 @@ namespace IGMarkets
             Guard.Against.NullOrEmpty(epic, nameof(epic));
 
             var response = await RetryPolicy.ExecuteAsync(
-                () => IG("/prices/" + epic, version: 3)
+                () => RestAPI("/prices/" + epic, version: 3)
                     .SetQueryParam("resolution", timeframe)
                     .SetQueryParam("max", maxNumberOfPricePoints)
                     .SetQueryParam("pageSize", 0) // disabling paging
@@ -215,7 +215,7 @@ namespace IGMarkets
             _logger.Debug($"Requesting {epic} prices  between {from.ToUniversalTime()} and {to.ToUniversalTime()} (timeframe: {timeframe})");
 
             var response = await RetryPolicy.ExecuteAsync(
-                () => IG("/prices/" + epic, version: 3)
+                () => RestAPI("/prices/" + epic, version: 3)
                     .SetQueryParam("resolution", timeframe)
                     .SetQueryParam("from", from.ToString("s"))
                     .SetQueryParam("to", to.ToString("s"))
@@ -237,7 +237,7 @@ namespace IGMarkets
             string markets = string.Join(",", marketIds);
 
             var response = await RetryPolicy.ExecuteAsync(
-                () => IG("/clientsentiment?marketIds=" + markets).GetJsonAsync<ClientSentimentResults>()
+                () => RestAPI("/clientsentiment?marketIds=" + markets).GetJsonAsync<ClientSentimentResults>()
             );
 
             return response.ClientSentiments ?? new List<ClientSentiment>();
@@ -250,7 +250,7 @@ namespace IGMarkets
         public async Task<IList<Watchlist>> GetWatchlists()
         {
             var response = await RetryPolicy.ExecuteAsync(
-                () => IG("/watchlists").GetJsonAsync<WatchlistsResult>()
+                () => RestAPI("/watchlists").GetJsonAsync<WatchlistsResult>()
             );
 
             return response.Watchlists ?? new List<Watchlist>();
@@ -261,7 +261,7 @@ namespace IGMarkets
             Guard.Against.NullOrEmpty(id, nameof(id));
 
             var response = await RetryPolicy.ExecuteAsync(
-                () => IG("/watchlists/" + id).GetJsonAsync<WatchlistMarkets>()
+                () => RestAPI("/watchlists/" + id).GetJsonAsync<WatchlistMarkets>()
             );
             
             return response.Markets ?? new List<WatchlistMarket>();
@@ -294,13 +294,13 @@ namespace IGMarkets
         /// <summary>
         /// Creates a new HttpRequest to be used when calling the IG Markets REST API.
         /// </summary>
-        private IFlurlRequest IG(string endpoint, int version = 1) => new IGRequest(_credentials, Session).Endpoint(endpoint, version);
+        private IFlurlRequest RestAPI(string endpoint, int version = 1) => new IGRequest(_credentials, Session).Endpoint(endpoint, version);
 
-        private async Task LogRequest(FlurlCall call)
+        private void LogRequest(FlurlCall call)
         {
             if (_logger.IsDebugEnabled)
             {
-                _logger.Debug(ReadSanitizedRequest(call));
+                _logger.Debug(LogHandler.ReadSanitizedRequest(call));
             }
         }
 
@@ -308,28 +308,8 @@ namespace IGMarkets
         {
             if (_logger.IsDebugEnabled)
             {
-                _logger.Debug(await ReadResponse(call));
+                _logger.Debug(await LogHandler.ReadResponse(call));
             }
-        }
-
-        private string ReadSanitizedRequest(FlurlCall call)
-        {
-            string verb = call.Request.Verb.ToString();
-            string path = call.Request.Url;
-            string headers = string.Join(Environment.NewLine, call.Request.Headers.Select((name, index) => $"{index+1}: {name}"));
-            string body = call.Request.Url.Path == "/gateway/deal/session" ? "*******" : call.RequestBody.JsonPrettify();
-            
-            return $"--> HTTP {verb} {call.Request.Url}{Environment.NewLine}HEADERS:{Environment.NewLine}{headers}{Environment.NewLine}BODY:{Environment.NewLine}:{body}";
-        }
-
-        private async Task<string> ReadResponse(FlurlCall call)
-        {
-            var response = await call.Response.ResponseMessage.Content.ReadAsStringAsync();
-            var status = call.Response.ResponseMessage?.StatusCode;
-            string headers = string.Join(Environment.NewLine, call.Response?.Headers?.Select((name, index) => $"{index + 1}: {name}"));
-            double? duration = call.Completed ? call.Duration?.TotalMilliseconds : 0;
-
-            return $"<-- HTTP {status} [{call}] [duration:{duration}ms]{Environment.NewLine}HEADERS:{Environment.NewLine}{headers}{Environment.NewLine}BODY:{Environment.NewLine}:{response}";
         }
 
         #endregion
