@@ -286,10 +286,11 @@ namespace IGMarkets
         /// <summary>
         /// Creates a Polly Policy to retry once if facing an authorization issue (catched with a 401 http response). Refreshing the "access token" if this is the case.
         /// </summary>
-        private AsyncRetryPolicy RetryPolicy => Policy.Handle<FlurlHttpException>(exception => exception.StatusCode == 401) // Handling HTTP 401: error.security.oauth-token-invalid
-                                                      .RetryAsync(1, // retrying only once
-                                                        onRetry: async (exception, attemptNumber) => await RefreshSession()
-                                                       );
+        private AsyncRetryPolicy RetryPolicy => Policy
+            .Handle<FlurlHttpException>(exception => exception.StatusCode == 401) // Handling HTTP 401: error.security.oauth-token-invalid
+            .RetryAsync(1, // retrying only once
+                onRetry: async (exception, attemptNumber) => await RefreshSession()
+            );
 
         /// <summary>
         /// Creates a new HttpRequest to be used when calling the IG Markets REST API.
