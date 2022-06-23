@@ -300,7 +300,7 @@ namespace IGMarkets
         {
             if (_logger.IsDebugEnabled)
             {
-                _logger.Debug(LogHandler.ReadSanitizedRequest(call));
+                _logger.Debug(call.FormatRequest());
             }
         }
 
@@ -308,7 +308,7 @@ namespace IGMarkets
         {
             if (_logger.IsDebugEnabled)
             {
-                _logger.Debug(await LogHandler.ReadResponse(call));
+                _logger.Debug(await call.FormatResponse());
             }
         }
 
