@@ -1,4 +1,5 @@
 using Flurl.Http.Testing;
+using IGMarkets.API;
 using NUnit.Framework;
 using System;
 using System.Linq;
@@ -77,7 +78,15 @@ namespace IGMarkets.Tests
             var trading = Connect();
             string accessToken = trading.Session.OAuthToken.Access_token;
             string refreshToken = trading.Session.OAuthToken.Refresh_token;
-            ArrangeHttpSessionResponse(demo: true); // New Http response when calling /session/refresh-token
+            var newRefreshToken = new
+            {
+                access_token = Guid.NewGuid(),
+                refresh_token = Guid.NewGuid(),
+                scope = "profile",
+                token_type = "Bearer",
+                expires_in = 60
+            };
+            _httpTest.RespondWithJson(newRefreshToken);
 
             // Act
             await trading.RefreshSession();
@@ -473,6 +482,43 @@ namespace IGMarkets.Tests
 
             // Act && Assert
             Assert.ThrowsAsync<ArgumentException>(async () => await trading.GetSentiments(marketsIds));
+        }
+
+        #endregion
+
+        #region Tests for /application
+        [Test]
+        public async Task ClientApplication_GetApplication()
+        {
+            // Arrange
+            var trading = Connect();
+            var jsonFile = $"clientapplications.json";
+            _httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var applications = await trading.GetApplication();
+
+            // Assert
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/operations/application")
+                .WithVerb(HttpMethod.Get)
+                .WithHeader("VERSION", 1)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotNull(applications);
+            Assert.IsNotEmpty(applications);
+            Assert.AreEqual(1, applications.Count);
+            var application = applications.First(); // "IG"
+            Assert.AreEqual(application.Name, "IG");
+            Assert.AreEqual(application.Status, "ENABLED");
+            Assert.AreEqual(application.ApiKey, "111122223333aaaabbbbccccdddd444455556666");
+            Assert.AreEqual(application.AllowanceApplicationOverall, 20);
+            Assert.AreEqual(application.AllowanceAccountTrading, 33);
+            Assert.AreEqual(application.AllowanceAccountOverall, 10);
+            Assert.AreEqual(application.AllowanceAccountHistoricalData, 10000);
+            Assert.AreEqual(application.ConcurrentSubscriptionsLimit, 40);
+            Assert.AreEqual(application.AllowEquities, false);
+            Assert.AreEqual(application.AllowQuoteOrders, false);
+            Assert.AreEqual(application.CreatedDate, "2021-03-04");
         }
 
         #endregion

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using IGMarkets;
 using Microsoft.Extensions.Configuration;
 
@@ -8,14 +9,7 @@ var password = config["IG:password"];
 var apiKey = config["IG:apiKey"];
 
 using var trading = IG.Connect(login, password, apiKey, isDemo: true);
-
-string epic = "CC.D.LCO.UNC.IP";
-var prices = await trading.GetPrices(epic, Timeframe.DAY);
-
-foreach (var price in prices)
-{
-    Console.WriteLine($"\t{price.SnapshotTime}: O:[{price.OpenPrice}] C:[{price.ClosePrice}] H:[{price.HighPrice}] L:[{price.LowPrice}]");
-}
+await GetApplication(trading);
 
 static IConfigurationRoot ConfigurationBuilder()
 {
@@ -25,7 +19,7 @@ static IConfigurationRoot ConfigurationBuilder()
         .Build();
 }
 
-static async System.Threading.Tasks.Task Navigate(Trading trading)
+static async Task Navigate(Trading trading)
 {
     var navigation = await trading.GetMarketNavigation();
 
@@ -43,11 +37,20 @@ static async System.Threading.Tasks.Task Navigate(Trading trading)
     }
 }
 
+static async Task GetApplication(Trading trading)
+{
+    var applications = await trading.GetApplication();
+    foreach (var application in applications)
+    {
+        Console.WriteLine($"Application {application.Name} [{application.Status}]");
+    }
+}
+
 /*    
  *    Some examples:
  *
 
-static async System.Threading.Tasks.Task TestRefreshRoken(Trading trading)
+static async Tasks.Task TestRefreshRoken(Trading trading)
 {
     Console.WriteLine($"access_token: {trading.Session.OAuthToken.Access_token}");
     Console.WriteLine($"expires at: {trading.Session.OAuthToken.GetExpirationDate().ToShortTimeString()}");

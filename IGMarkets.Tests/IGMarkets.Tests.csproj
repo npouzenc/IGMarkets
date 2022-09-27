@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Json\clientapplications.json" />
     <None Remove="Json\clientsentiments_unknown.json" />
     <None Remove="Json\clientsentiment_DE30,EURUSD,FR40.json" />
     <None Remove="Json\clientsentiment_FR40.json" />
@@ -24,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Json\clientapplications.json" />
     <EmbeddedResource Include="Json\clientsentiment_FR40.json" />
     <EmbeddedResource Include="Json\clientsentiments_UNKNOWN.json" />
     <EmbeddedResource Include="Json\clientsentiment_DE30,EURUSD,FR40.json" />

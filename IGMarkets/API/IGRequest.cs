@@ -54,7 +54,7 @@ namespace IGMarkets.API
             string endpoint = Url.Combine(Api, path);
             var request = endpoint.WithHeader("VERSION", version)
                     .WithHeader("X-IG-API-KEY", Credentials.ApiKey);
-            if (Session.AccountId != null && Session.OAuthToken != null)
+            if (Session.AccountId != null && Session.OAuthToken != null && Session.OAuthToken.Access_token != null)
             {
                 request
                     .WithHeader("IG-ACCOUNT-ID", Session.AccountId)

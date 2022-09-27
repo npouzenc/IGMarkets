@@ -1,0 +1,15 @@
+﻿[
+  {
+    "name": "IG",
+    "apiKey": "111122223333aaaabbbbccccdddd444455556666",
+    "status": "ENABLED",
+    "allowanceApplicationOverall": 20,
+    "allowanceAccountTrading": 33,
+    "allowanceAccountOverall": 10,
+    "allowanceAccountHistoricalData": 10000,
+    "concurrentSubscriptionsLimit": 40,
+    "allowEquities": false,
+    "allowQuoteOrders": false,
+    "createdDate": "2021-03-04"
+  }
+]

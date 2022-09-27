@@ -48,82 +48,21 @@ namespace IGMarkets
             });
         }
 
-        #region /session endpoints
+        #region /clientsentiment endpoints
 
-        /// <summary>
-        /// Asynchronous login to created a new trading session on IGMarkets with specified credentials.
-        /// </summary>
-        /// <param name="identifier">Username of the account to connect to.</param>
-        /// <param name="password">Password to use</param>
-        /// <param name="apiKey">The API key k (obtained from My Account on our dealing platform) is how we identify and authorise the calling application</param>
-        /// <param name="isDemo">Are you using a LIVE account or a DEMO account?</param>
-        /// <returns></returns>
-        public async Task Login(string identifier, string password, string apiKey, bool isDemo = false)
+        public async Task<IList<ClientSentiment>> GetSentiments(params string[] marketIds)
         {
-            await Login(new Credentials(identifier, password, apiKey, isDemo));
+            Guard.Against.NullOrEmpty(marketIds, nameof(marketIds));
+
+            string markets = string.Join(",", marketIds);
+
+            var response = await RetryPolicy.ExecuteAsync(
+                () => RestAPI("/clientsentiment?marketIds=" + markets).GetJsonAsync<ClientSentimentResults>()
+            );
+
+            return response.ClientSentiments ?? new List<ClientSentiment>();
         }
 
-        public async Task Login(Credentials credentials) 
-        {
-            Guard.Against.Null(credentials, nameof(credentials));
-
-            _credentials = credentials;
-            try
-            {
-                this.Session = await RestAPI("/session", 3) // "OAuth" authentication mode
-                    .PostJsonAsync(new { identifier = credentials.Identifier, password = credentials.Password })
-                    .ReceiveJson<Session>();
-
-                IsConnected = true;
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Fatal(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                throw; // If we cannot login ...
-            }
-        }
-
-        public async Task Logout()
-        {
-            try
-            {
-                await RestAPI("/session").DeleteAsync();
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-            }
-            finally
-            {
-                IsConnected = false;
-            }
-        }
-
-        public async Task RefreshSession()
-        {
-            try
-            {
-                var refreshToken = Session.OAuthToken.Refresh_token;
-                Session.OAuthToken = null; // Deleting invalid access token to prevent an error from IG when requesting /session endpoint (because the actual access token could be sent to the REST API that doesn't like it)
-
-                Session.OAuthToken = await RestAPI("/session/refresh-token")
-                    .PostJsonAsync(new { refresh_token = refreshToken })
-                    .ReceiveJson<OAuthToken>();
-
-                var newToken = Session.OAuthToken;
-                if (newToken == null || string.IsNullOrEmpty(newToken.Access_token) || string.IsNullOrEmpty(newToken.Refresh_token))
-                {
-                    throw new ApplicationException($"No valid access token when refreshing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
-                }
-                IsConnected = true;
-
-            }
-            catch (FlurlHttpException ex)
-            {
-                _logger.Fatal(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
-                throw;
-            }
-        }
         #endregion
 
         #region /marketnavigation endpoints
@@ -189,6 +128,19 @@ namespace IGMarkets
 
         #endregion
 
+        #region /operations endpoints
+
+        public async Task<ClientApplications> GetApplication()
+        {
+            var response = await RetryPolicy.ExecuteAsync(
+                () => RestAPI("/operations/application").GetJsonAsync<ClientApplications>()
+            );
+
+            return response;
+        }
+
+        #endregion
+
         #region /prices endpoints
 
         public async Task<IList<Price>> GetPrices(string epic, Timeframe timeframe, int maxNumberOfPricePoints = 10)
@@ -228,21 +180,82 @@ namespace IGMarkets
 
         #endregion
 
-        #region /clientsentiment endpoints
+        #region /session endpoints
 
-        public async Task<IList<ClientSentiment>> GetSentiments(params string[] marketIds)
+        /// <summary>
+        /// Asynchronous login to created a new trading session on IGMarkets with specified credentials.
+        /// </summary>
+        /// <param name="identifier">Username of the account to connect to.</param>
+        /// <param name="password">Password to use</param>
+        /// <param name="apiKey">The API key k (obtained from My Account on our dealing platform) is how we identify and authorise the calling application</param>
+        /// <param name="isDemo">Are you using a LIVE account or a DEMO account?</param>
+        /// <returns></returns>
+        public async Task Login(string identifier, string password, string apiKey, bool isDemo = false)
         {
-            Guard.Against.NullOrEmpty(marketIds, nameof(marketIds));
-
-            string markets = string.Join(",", marketIds);
-
-            var response = await RetryPolicy.ExecuteAsync(
-                () => RestAPI("/clientsentiment?marketIds=" + markets).GetJsonAsync<ClientSentimentResults>()
-            );
-
-            return response.ClientSentiments ?? new List<ClientSentiment>();
+            await Login(new Credentials(identifier, password, apiKey, isDemo));
         }
 
+        public async Task Login(Credentials credentials)
+        {
+            Guard.Against.Null(credentials, nameof(credentials));
+
+            _credentials = credentials;
+            try
+            {
+                this.Session = await RestAPI("/session", 3) // "OAuth" authentication mode
+                    .PostJsonAsync(new { identifier = credentials.Identifier, password = credentials.Password })
+                    .ReceiveJson<Session>();
+
+                IsConnected = true;
+            }
+            catch (FlurlHttpException ex)
+            {
+                _logger.Fatal(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw; // If we cannot login ...
+            }
+        }
+
+        public async Task Logout()
+        {
+            try
+            {
+                await RestAPI("/session").DeleteAsync();
+            }
+            catch (FlurlHttpException ex)
+            {
+                _logger.Error(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+            }
+            finally
+            {
+                IsConnected = false;
+            }
+        }
+
+        public async Task RefreshSession()
+        {
+            try
+            {
+                var refreshToken = Session.OAuthToken.Refresh_token;
+                Session.OAuthToken = null; // Deleting invalid access token to prevent an error from IG when requesting /session endpoint (because the actual access token could be sent to the REST API that doesn't like it)
+
+                Session.OAuthToken = await RestAPI("/session/refresh-token")
+                    .PostJsonAsync(new { refresh_token = refreshToken })
+                    .ReceiveJson<OAuthToken>();
+
+                var newToken = Session.OAuthToken;
+                if (newToken == null || string.IsNullOrEmpty(newToken.Access_token) || string.IsNullOrEmpty(newToken.Refresh_token))
+                {
+                    throw new ApplicationException($"No valid access token when refreshing the dealing session on account '{Session.AccountId}' for identifier '{_credentials.Identifier}'");
+                }
+                IsConnected = true;
+
+            }
+            catch (FlurlHttpException ex)
+            {
+                _logger.Fatal(ex, $"Error returned from {ex.Call.Request.Url}: {ex.Message}");
+                throw;
+            }
+        }
         #endregion
 
         #region /watchlists endpoints
