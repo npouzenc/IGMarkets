@@ -1,0 +1,38 @@
+﻿{
+  "accounts": [
+    {
+      "accountId": "XABCD",
+      "accountName": "Demo-CFD",
+      "accountAlias": null,
+      "status": "ENABLED",
+      "accountType": "CFD",
+      "preferred": true,
+      "balance": {
+        "balance": 0.0,
+        "deposit": 0.0,
+        "profitLoss": 0.0,
+        "available": 0.0
+      },
+      "currency": "EUR",
+      "canTransferFrom": true,
+      "canTransferTo": true
+    },
+    {
+      "accountId": "XEFGH",
+      "accountName": "Options",
+      "accountAlias": null,
+      "status": "ENABLED",
+      "accountType": "CFD",
+      "preferred": false,
+      "balance": {
+        "balance": 1000.10,
+        "deposit": 2000.20,
+        "profitLoss": 3000.30,
+        "available": 4000.40
+      },
+      "currency": "EUR",
+      "canTransferFrom": true,
+      "canTransferTo": true
+    }
+  ]
+}

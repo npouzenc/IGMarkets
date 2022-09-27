@@ -12,7 +12,7 @@ namespace IGMarkets.API
     /// <summary>
     /// Base class for requesting IGMarkets' REST Trading API. Should be used only when a session has been already created (login passed).
     /// </summary>
-    class IGRequest
+    internal class IGRequest
     {
         /// <summary>
         /// Current session 

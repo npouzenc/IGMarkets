@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Json\accounts.json" />
     <None Remove="Json\clientapplications.json" />
     <None Remove="Json\clientsentiments_unknown.json" />
     <None Remove="Json\clientsentiment_DE30,EURUSD,FR40.json" />
@@ -22,6 +23,12 @@
     <None Remove="Json\watchlists.json" />
     <None Remove="Json\watchlist_5222222.json" />
     <None Remove="Json\watchlist_PopularMarkets.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Json\accounts.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

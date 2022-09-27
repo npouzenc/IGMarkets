@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using IGMarkets;
 using Microsoft.Extensions.Configuration;
+using static System.Net.Mime.MediaTypeNames;
 
 var config = ConfigurationBuilder();
 var login = config["IG:login"];
@@ -9,7 +10,7 @@ var password = config["IG:password"];
 var apiKey = config["IG:apiKey"];
 
 using var trading = IG.Connect(login, password, apiKey, isDemo: true);
-await GetApplication(trading);
+await GetAccounts(trading);
 
 static IConfigurationRoot ConfigurationBuilder()
 {
@@ -18,6 +19,17 @@ static IConfigurationRoot ConfigurationBuilder()
         .AddUserSecrets<Program>()
         .Build();
 }
+
+static async Task GetAccounts(Trading trading)
+{
+    foreach (var account in await trading.GetAccounts())
+    {
+        Console.WriteLine($"Account {account.AccountName} [{account.AccountType}: {account.AccountId}]");
+    }
+}
+/*    
+ *    Some examples:
+ *
 
 static async Task Navigate(Trading trading)
 {
@@ -45,10 +57,6 @@ static async Task GetApplication(Trading trading)
         Console.WriteLine($"Application {application.Name} [{application.Status}]");
     }
 }
-
-/*    
- *    Some examples:
- *
 
 static async Tasks.Task TestRefreshRoken(Trading trading)
 {

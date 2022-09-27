@@ -8,9 +8,9 @@ namespace IGMarkets.API
 {
     public class AccountInfo
     {
-        public float Balance { get; set; }
-        public float Deposit { get; set; }
-        public float ProfitLoss{ get; set; }
-        public float Available { get; set; }
+        public double Balance { get; set; }
+        public double Deposit { get; set; }
+        public double ProfitLoss { get; set; }
+        public double Available { get; set; }
     }
 }

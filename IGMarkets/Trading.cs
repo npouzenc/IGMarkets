@@ -48,6 +48,19 @@ namespace IGMarkets
             });
         }
 
+        #region /accounts endpoints
+
+        public async Task<IList<Account>> GetAccounts()
+        {
+            var response = await RetryPolicy.ExecuteAsync(
+                () => RestAPI("/accounts").GetJsonAsync<AccountResults>()
+            );
+
+            return response.Accounts ?? new List<Account>();
+        }
+
+        #endregion  
+
         #region /clientsentiment endpoints
 
         public async Task<IList<ClientSentiment>> GetSentiments(params string[] marketIds)

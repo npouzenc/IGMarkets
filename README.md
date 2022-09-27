@@ -24,7 +24,7 @@ foreach (var price in prices)
 
 Account:
 
-- [ ] /accounts
+- [x] /accounts
 - [ ] /accounts/preferences
 - [ ] /history
 - [ ] /history/activity

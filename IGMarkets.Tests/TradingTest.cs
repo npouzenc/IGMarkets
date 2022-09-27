@@ -523,6 +523,63 @@ namespace IGMarkets.Tests
 
         #endregion
 
+        #region Tests for /accounts
+        [Test]
+        public async Task Accounts_GetAccounts()
+        {
+            // Arrange
+            var trading = Connect();
+            var jsonFile = $"accounts.json";
+            _httpTest.RespondWith(LoadResource(jsonFile));
+
+            // Act
+            var accounts = await trading.GetAccounts();
+
+            // Assert
+            _httpTest.ShouldHaveCalled("https://demo-api.ig.com/gateway/deal/accounts")
+                .WithVerb(HttpMethod.Get)
+                .WithHeader("VERSION", 1)
+                .WithHeader("X-IG-API-KEY")
+                .WithOAuthBearerToken();
+            Assert.IsNotNull(accounts);
+            Assert.IsNotEmpty(accounts);
+            Assert.AreEqual(2, accounts.Count);
+
+            var cfd = accounts.First(); // "CFD"
+            Assert.AreEqual(cfd.AccountName, "Demo-CFD");
+            Assert.AreEqual(cfd.AccountId, "XABCD");
+            Assert.AreEqual(cfd.Status, "ENABLED");
+            Assert.AreEqual(cfd.AccountType, "CFD");
+            Assert.AreEqual(cfd.AccountAlias, null);
+            Assert.AreEqual(cfd.Preferred, true);
+            Assert.AreEqual(cfd.Currency, "EUR");
+            Assert.AreEqual(cfd.CanTransferFrom, true);
+            Assert.AreEqual(cfd.CanTransferTo, true);
+            Assert.IsNotNull(cfd.Balance);
+            Assert.AreEqual(cfd.Balance.Balance, 0);
+            Assert.AreEqual(cfd.Balance.Available, 0);
+            Assert.AreEqual(cfd.Balance.Deposit, 0);
+            Assert.AreEqual(cfd.Balance.ProfitLoss, 0);
+
+            var options = accounts.Last(); // "Options"
+            Assert.AreEqual(options.AccountName, "Options");
+            Assert.AreEqual(options.AccountId, "XEFGH");
+            Assert.AreEqual(options.Status, "ENABLED");
+            Assert.AreEqual(options.AccountType, "CFD");
+            Assert.AreEqual(options.AccountAlias, null);
+            Assert.AreEqual(options.Preferred, false);
+            Assert.AreEqual(options.Currency, "EUR");
+            Assert.AreEqual(options.CanTransferFrom, true);
+            Assert.AreEqual(options.CanTransferTo, true);
+            Assert.IsNotNull(options.Balance);
+            Assert.AreEqual(options.Balance.Balance, 1000.10);
+            Assert.AreEqual(options.Balance.Available, 4000.40);
+            Assert.AreEqual(options.Balance.Deposit, 2000.20);
+            Assert.AreEqual(options.Balance.ProfitLoss, 3000.30);
+        }
+
+        #endregion
+
         #region Tests for /watchlists
 
         [Test]
