@@ -48,13 +48,14 @@ Dealing:
 General:
 
 - [x] /operations/application
+- [ ] /operations/application/disable
 
 Markets:
 
 - [x] /marketsnavigation
 - [x] /markets
 - [x] /markets/epic
-- [ ] /markets?searchTerm=
+- [x] /markets?searchTerm=
 - [x] /prices
 - [x] /prices/epic
 
