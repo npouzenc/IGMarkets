@@ -22,7 +22,7 @@ namespace IGMarkets
 
         public bool IsDemo { get; private set; }
 
-        public Credentials(string identifier, string password, string apiKey, bool isDemo)
+        public Credentials(string identifier, string password, string apiKey, bool isDemo = false)
         {
             Guard.Against.NullOrWhiteSpace(identifier, nameof(identifier));
             Identifier = identifier;
@@ -34,11 +34,6 @@ namespace IGMarkets
             ApiKey = apiKey;
 
             IsDemo = isDemo;
-        }
-
-        public Credentials(IConfiguration configuration, bool isDemo = false) :
-            this(configuration["IGMarkets:identifier"], configuration["IGMarkets:password"], configuration["IGMarkets:apiKey"], isDemo)
-        {
         }
 
         public override string ToString()

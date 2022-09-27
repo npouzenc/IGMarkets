@@ -2,14 +2,11 @@
 using System.Threading.Tasks;
 using IGMarkets;
 using Microsoft.Extensions.Configuration;
-using static System.Net.Mime.MediaTypeNames;
 
-var config = ConfigurationBuilder();
-var login = config["IGMarkets:identifier"];
-var password = config["IGMarkets:password"];
-var apiKey = config["IGMarkets:apiKey"];
+var config = ConfigurationBuilder().GetRequiredSection("IGMarkets");
+var credentials = new Credentials(config["id"], config["password"], config["apiKey"], isDemo: true);
+using var trading = IG.Connect(credentials);
 
-using var trading = IG.Connect(login, password, apiKey, isDemo: true);
 foreach (var account in await trading.GetAccounts())
 {
     Console.WriteLine($"Account {account.AccountName} [{account.AccountType}: {account.Status}]");

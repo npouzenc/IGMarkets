@@ -22,5 +22,18 @@ namespace IGMarkets
             tradingSession.Login(identifier, password, apiKey, isDemo).Wait();
             return tradingSession;
         }
+
+        /// <summary>
+        /// Entry point to create a new trading session on IGMarkets with specified credentials.
+        /// </summary>
+        /// <param name="Credentials">Credentials to be used.</param>
+        /// <param name="isDemo">Are you using a LIVE account or a DEMO account?</param>
+        /// <returns>A new <see cref="ITrading"/> instance allowing a trading session for the credentials provided.</returns>
+        public static Trading Connect(Credentials credentials)
+        {
+            var tradingSession = new Trading();
+            tradingSession.Login(credentials).Wait();
+            return tradingSession;
+        }
     }
 }
