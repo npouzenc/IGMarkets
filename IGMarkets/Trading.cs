@@ -314,8 +314,7 @@ namespace IGMarkets
         /// </summary>
         private AsyncRetryPolicy RetryPolicy => Policy
             .Handle<FlurlHttpException>(exception => exception.StatusCode == 401) // Handling HTTP 401: error.security.oauth-token-invalid
-            .RetryAsync(1, // retrying only once
-                onRetry: async (exception, attemptNumber) => await RefreshSession()
+            .RetryAsync(async(exception, retryCount) => await RefreshSession().ConfigureAwait(false)
             );
 
         /// <summary>

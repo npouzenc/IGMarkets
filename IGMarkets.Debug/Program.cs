@@ -2,15 +2,14 @@
 using System.Threading.Tasks;
 using IGMarkets;
 using Microsoft.Extensions.Configuration;
+using NLog;
 
+Logger logger = LogManager.GetCurrentClassLogger();
 var config = ConfigurationBuilder().GetRequiredSection("IGMarkets");
 var credentials = new Credentials(config["id"], config["password"], config["apiKey"], isDemo: true);
 using var trading = IG.Connect(credentials);
 
-foreach (var account in await trading.GetAccounts())
-{
-    Console.WriteLine($"Account {account.AccountName} [{account.AccountType}: {account.Status}]");
-}
+await Navigate(trading, logger);
 
 static IConfigurationRoot ConfigurationBuilder()
 {
@@ -19,27 +18,27 @@ static IConfigurationRoot ConfigurationBuilder()
         .Build();
 }
 
-/*    
- *    Some examples:
- *
-
-static async Task Navigate(Trading trading)
+static async Task Navigate(Trading trading, Logger logger)
 {
     var navigation = await trading.GetMarketNavigation();
 
-    Console.WriteLine(navigation);
+    logger.Info(navigation);
 
     foreach (var node in navigation)
     {
-        Console.WriteLine($"{node.ID} ({node.Name}):");
+        logger.Info($"Node: {node.ID} ({node.Name}):");
         var subNavigation = await trading.GetMarketNavigation(node.ID);
         foreach (var subNode in subNavigation)
         {
-            Console.WriteLine($"\t{subNode.ID} ({subNode.Name})");
+            logger.Info($"SubNode:{subNode.ID} ({subNode.Name})");
         }
         System.Threading.Thread.Sleep(10000); // avoiding error.public-api.exceeded-api-key-allowance
     }
 }
+
+/*    
+ *    Some examples:
+ *
 
 static async Task GetApplication(Trading trading)
 {
