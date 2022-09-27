@@ -5,28 +5,23 @@ using Microsoft.Extensions.Configuration;
 using static System.Net.Mime.MediaTypeNames;
 
 var config = ConfigurationBuilder();
-var login = config["IG:login"];
-var password = config["IG:password"];
-var apiKey = config["IG:apiKey"];
+var login = config["IGMarkets:identifier"];
+var password = config["IGMarkets:password"];
+var apiKey = config["IGMarkets:apiKey"];
 
 using var trading = IG.Connect(login, password, apiKey, isDemo: true);
-await GetAccounts(trading);
+foreach (var account in await trading.GetAccounts())
+{
+    Console.WriteLine($"Account {account.AccountName} [{account.AccountType}: {account.Status}]");
+}
 
 static IConfigurationRoot ConfigurationBuilder()
 {
     return new ConfigurationBuilder()
-        .SetBasePath(System.AppDomain.CurrentDomain.BaseDirectory)
         .AddUserSecrets<Program>()
         .Build();
 }
 
-static async Task GetAccounts(Trading trading)
-{
-    foreach (var account in await trading.GetAccounts())
-    {
-        Console.WriteLine($"Account {account.AccountName} [{account.AccountType}: {account.AccountId}]");
-    }
-}
 /*    
  *    Some examples:
  *

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IGMarkets.API;
+using Microsoft.Extensions.Configuration;
 
 namespace IGMarkets
 {
@@ -33,6 +34,11 @@ namespace IGMarkets
             ApiKey = apiKey;
 
             IsDemo = isDemo;
+        }
+
+        public Credentials(IConfiguration configuration, bool isDemo = false) :
+            this(configuration["IGMarkets:identifier"], configuration["IGMarkets:password"], configuration["IGMarkets:apiKey"], isDemo)
+        {
         }
 
         public override string ToString()
