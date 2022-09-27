@@ -45,6 +45,10 @@ Dealing:
 - [ ] /workingorders/otc
 - [ ] /workingorders/otc/dealId
 
+General:
+
+- [x] /operations/application
+
 Markets:
 
 - [x] /marketsnavigation
