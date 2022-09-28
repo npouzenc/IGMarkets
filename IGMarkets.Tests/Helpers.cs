@@ -10,7 +10,7 @@ namespace IGMarkets.Tests
 {
     public class Helpers
     {
-        protected HttpTest _httpTest;
+        private HttpTest _httpTest;
 
         [SetUp]
         public void Setup()
@@ -24,6 +24,7 @@ namespace IGMarkets.Tests
             _httpTest.Dispose();
         }
 
+        protected HttpTest HttpTest { get; private set; }
 
         /// <summary>
         /// Load string from embbeded resource

@@ -295,6 +295,30 @@ namespace IGMarkets
 
         #endregion
 
+        #region /positions endpoints
+
+        public async Task<IList<Position>> GetPositions()
+        {
+            IList<Position> positions = new List<Position>();
+
+            var response = await RetryPolicy.ExecuteAsync(
+                () => RestAPI("/positions", version: 2).GetJsonAsync<Positions>()
+            );            
+
+           var result = response.Result;
+            if (result != null)
+            {
+                foreach (var position in result)
+                {
+                    positions.Add(position.Position);
+                }
+            }
+
+            return positions;
+        }
+
+        #endregion
+
         #region IDisposable
 
         public async void Dispose()

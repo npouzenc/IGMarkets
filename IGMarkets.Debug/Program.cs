@@ -5,22 +5,24 @@ using Microsoft.Extensions.Configuration;
 using NLog;
 
 Logger logger = LogManager.GetCurrentClassLogger();
-var config = ConfigurationBuilder().GetRequiredSection("IGMarkets");
+var config = GetConfiguration();
 var credentials = new Credentials(config["id"], config["password"], config["apiKey"], isDemo: true);
 using var trading = IG.Connect(credentials);
+await GetPositions();
 
-await Navigate(trading, logger);
 
-static IConfigurationRoot ConfigurationBuilder()
+async Task GetPositions()
 {
-    return new ConfigurationBuilder()
-        .AddUserSecrets<Program>()
-        .Build();
+    var positions= await trading.GetPositions();
+    foreach (var position in positions)
+    {
+        logger.Info($"Position {position.DealId}> size: {position.DealSize}");
+    }
 }
 
-static async Task Navigate(Trading trading, Logger logger)
+async Task Navigate()
 {
-    var navigation = await trading.GetMarketNavigation();
+    var navigation = await trading.GetMarketNavigation("264145");
 
     logger.Info(navigation);
 
@@ -32,22 +34,30 @@ static async Task Navigate(Trading trading, Logger logger)
         {
             logger.Info($"SubNode:{subNode.ID} ({subNode.Name})");
         }
-        System.Threading.Thread.Sleep(10000); // avoiding error.public-api.exceeded-api-key-allowance
+        System.Threading.Thread.Sleep(2500); // avoiding error.public-api.exceeded-api-key-allowance
+    }
+}
+
+IConfigurationSection GetConfiguration()
+{
+    return new ConfigurationBuilder()
+        .AddUserSecrets<Program>()
+        .Build()
+        .GetRequiredSection("IGMarkets");
+}
+
+async Task GetApplication()
+{
+    var applications = await trading.GetApplication();
+    foreach (var application in applications)
+    {
+        logger.Info($"Application {application.Name}> overall: {application.AllowanceAccountOverall}; application limit: {application.AllowanceApplicationOverall}");
     }
 }
 
 /*    
  *    Some examples:
  *
-
-static async Task GetApplication(Trading trading)
-{
-    var applications = await trading.GetApplication();
-    foreach (var application in applications)
-    {
-        Console.WriteLine($"Application {application.Name} [{application.Status}]");
-    }
-}
 
 static async Tasks.Task TestRefreshRoken(Trading trading)
 {
